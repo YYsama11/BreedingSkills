@@ -10,7 +10,7 @@ log_prefix="$1"
 shift
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-workspace_dir="$(cd "${script_dir}/.." && pwd)"
+workspace_dir="${GWAS_WORKSPACE_DIR:-$(cd "${script_dir}/.." && pwd)}"
 log_dir="${workspace_dir}/analysis/logs/runtime"
 mkdir -p "${log_dir}"
 

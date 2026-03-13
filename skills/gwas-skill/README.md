@@ -165,6 +165,9 @@ export GWAS_THREADS=6
 export GWAS_EMMAX_PARALLEL=10
 ```
 
+`GWAS_WORKSPACE_DIR` is the external analysis workspace that contains `data/` and will receive `analysis/`.
+The workflow scripts themselves are executed from the `skills/gwas-skill/` repository directory and do not need to be copied into the workspace.
+
 If tools are not in `PATH`, define them explicitly:
 
 ```bash

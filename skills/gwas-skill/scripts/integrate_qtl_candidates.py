@@ -33,6 +33,16 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def normalize_chrom_name(name: str) -> str:
+    text = str(name).strip()
+    lowered = text.lower()
+    if lowered.startswith("chr"):
+        lowered = lowered[3:]
+    if lowered.isdigit():
+        lowered = str(int(lowered))
+    return lowered
+
+
 def load_ld_region(ld_file: Path, lead_row: pd.Series) -> dict[str, object]:
     if not ld_file.exists() or ld_file.stat().st_size == 0:
         return {
@@ -123,7 +133,7 @@ def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFram
 
     parts = []
     for chrom_value, sub in sig.groupby("chrom"):
-        chrom = f"Chr{int(chrom_value)}"
+        chrom = str(chrom_value)
         positions = sub["pos"].to_numpy(dtype=np.int64)
         region = np.array(["intergenic"] * len(sub), dtype=object)
         gene_ids = np.array([""] * len(sub), dtype=object)
@@ -161,6 +171,14 @@ def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFram
 def build_hotspots(qtl: pd.DataFrame) -> pd.DataFrame:
     if qtl.empty:
         return pd.DataFrame(columns=["hotspot_id", "chrom", "start", "end", "trait_count", "trait_ids"])
+
+    def extract_traits(row: pd.Series) -> list[str]:
+        if "trait_id" in row and pd.notna(row["trait_id"]):
+            return [str(row["trait_id"])]
+        if "trait_ids" in row and pd.notna(row["trait_ids"]):
+            return [item for item in str(row["trait_ids"]).split(",") if item]
+        return []
+
     hotspot_rows = []
     hotspot_id = 1
     for chrom, sub in qtl.sort_values(["chrom", "qtl_start", "qtl_end"]).groupby("chrom"):
@@ -183,10 +201,10 @@ def build_hotspots(qtl: pd.DataFrame) -> pd.DataFrame:
                     hotspot_id += 1
                 current_start = int(row["qtl_start"])
                 current_end = int(row["qtl_end"])
-                current_traits = [row["trait_id"]]
+                current_traits = extract_traits(row)
             else:
                 current_end = max(current_end, int(row["qtl_end"]))
-                current_traits.append(row["trait_id"])
+                current_traits.extend(extract_traits(row))
         if current_start is not None:
             hotspot_rows.append(
                 {
@@ -264,12 +282,16 @@ def main() -> None:
     annotation_dir = Path(args.annotation_dir)
     gene_meta = pd.read_csv(annotation_dir / "gene_metadata.tsv", sep="\t")
     genes = gene_meta.loc[:, ["chrom", "start", "end", "gene_id", "nr_annotation", "pfam"]].copy()
+    genes["chrom_norm"] = genes["chrom"].map(normalize_chrom_name)
     promoters = pd.read_csv(annotation_dir / "promoters_2kb.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
     promoters["start"] = promoters["start0"] + 1
+    promoters["chrom_norm"] = promoters["chrom"].map(normalize_chrom_name)
     exons = pd.read_csv(annotation_dir / "exons.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
     exons["start"] = exons["start0"] + 1
+    exons["chrom_norm"] = exons["chrom"].map(normalize_chrom_name)
     cds = pd.read_csv(annotation_dir / "cds.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
     cds["start"] = cds["start0"] + 1
+    cds["chrom_norm"] = cds["chrom"].map(normalize_chrom_name)
 
     ld_dir = Path(args.ld_dir)
     ld_records = []
@@ -284,6 +306,7 @@ def main() -> None:
         qtl_loci = qtl_loci.drop(columns=["chrom_y"])
     qtl_loci["qtl_id"] = [f"QTL{idx+1:05d}" for idx in range(qtl_loci.shape[0])]
     qtl_loci["qtl_size_kb"] = qtl_loci["qtl_size_bp"] / 1000
+    qtl_loci["chrom_norm"] = qtl_loci["chrom"].map(normalize_chrom_name)
     qtl_regions = qtl_loci.copy()
     if "lead_trait_count" in qtl_regions.columns:
         qtl_regions["trait_count"] = qtl_regions["lead_trait_count"].fillna(0).astype(int)
@@ -315,17 +338,17 @@ def main() -> None:
     qtl_trait.to_csv(outdir / "qtl_trait_membership.tsv", sep="\t", index=False)
 
     if not qtl_regions.empty:
+        hotspot = build_hotspots(qtl_regions[["chrom", "qtl_start", "qtl_end", "trait_ids"]].copy())
         hotspot_cutoff = max(5, int(np.ceil(qtl_regions["trait_count"].quantile(0.95))))
-        hotspot = qtl_regions[qtl_regions["trait_count"] >= hotspot_cutoff].copy()
-        hotspot["hotspot_definition"] = f"trait_count >= {hotspot_cutoff}"
+        hotspot["hotspot_definition"] = f"merged overlapping QTL intervals; reference trait-count cutoff among loci = {hotspot_cutoff}"
     else:
-        hotspot = pd.DataFrame(columns=list(qtl_regions.columns) + ["hotspot_definition"])
+        hotspot = pd.DataFrame(columns=["hotspot_id", "chrom", "start", "end", "trait_count", "trait_ids", "hotspot_definition"])
     hotspot.to_csv(outdir / "qtl_hotspots.tsv", sep="\t", index=False)
 
     candidate_rows = []
     for _, row in qtl_regions.iterrows():
-        chrom = f"Chr{int(row['chrom'])}"
-        overlap = genes[(genes["chrom"] == chrom) & (genes["end"] >= row["qtl_start"]) & (genes["start"] <= row["qtl_end"])].copy()
+        chrom_norm = row["chrom_norm"]
+        overlap = genes[(genes["chrom_norm"] == chrom_norm) & (genes["end"] >= row["qtl_start"]) & (genes["start"] <= row["qtl_end"])].copy()
         if overlap.empty:
             continue
         overlap["qtl_id"] = row["qtl_id"]

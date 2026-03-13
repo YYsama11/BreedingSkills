@@ -16,31 +16,61 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def normalize_chrom_name(name: str) -> str:
+    text = str(name).strip()
+    lowered = text.lower()
+    if lowered.startswith("chr"):
+        lowered = lowered[3:]
+    if lowered.isdigit():
+        lowered = str(int(lowered))
+    return lowered
+
+
 def main() -> None:
     args = parse_args()
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
-    fai = pd.read_csv(args.fai, sep="\t", header=None, names=["chrom", "length", "offset", "linebases", "linewidth"])
-    chrom_order = [f"Chr{int(str(chrom).replace('Chr', ''))}" for chrom in fai["chrom"]]
-    chrom_lengths = {int(str(chrom).replace("Chr", "")): int(length) for chrom, length in zip(fai["chrom"], fai["length"])}
+    fai = pd.read_csv(args.fai, sep="\t", header=None, names=["chrom", "length", "offset", "linebases", "linewidth"], dtype={0: str})
+    fai["chrom"] = fai["chrom"].astype(str)
+    chrom_lengths = {chrom: int(length) for chrom, length in zip(fai["chrom"], fai["length"])}
+    fai_norm = {}
+    for chrom in fai["chrom"]:
+        norm = normalize_chrom_name(chrom)
+        fai_norm.setdefault(norm, []).append(chrom)
 
     chrom_offsets = {}
     cumulative = 0
     tick_records = []
-    for chrom in sorted(chrom_lengths):
+    for chrom in fai["chrom"]:
         chrom_offsets[chrom] = cumulative
-        tick_records.append({"chrom": chrom, "label": f"Chr{chrom}", "midpoint": cumulative + chrom_lengths[chrom] / 2})
+        tick_records.append({"chrom": chrom, "label": chrom, "midpoint": cumulative + chrom_lengths[chrom] / 2})
         cumulative += chrom_lengths[chrom]
 
     bim = pd.read_csv(
         args.bim,
-        sep="\t",
+        sep=r"\s+",
         header=None,
         names=["chrom", "snp_id", "cm", "pos", "a1", "a2"],
-        dtype={"chrom": int, "snp_id": str, "cm": float, "pos": int, "a1": str, "a2": str},
+        dtype={"chrom": str, "snp_id": str, "cm": float, "pos": int, "a1": str, "a2": str},
     )
-    cum_pos = bim["chrom"].map(chrom_offsets).to_numpy(dtype=np.int64) + bim["pos"].to_numpy(dtype=np.int64)
+    chrom_map = {}
+    unresolved = []
+    for chrom in bim["chrom"].astype(str).unique():
+        if chrom in chrom_offsets:
+            chrom_map[chrom] = chrom
+            continue
+        norm = normalize_chrom_name(chrom)
+        candidates = fai_norm.get(norm, [])
+        if len(candidates) == 1:
+            chrom_map[chrom] = candidates[0]
+        else:
+            unresolved.append(chrom)
+    if unresolved:
+        raise ValueError(f"Unable to map BIM chromosome names to FAI chromosome names: {unresolved[:20]}")
+
+    bim["chrom_name"] = bim["chrom"].map(chrom_map)
+    cum_pos = bim["chrom_name"].map(chrom_offsets).to_numpy(dtype=np.int64) + bim["pos"].to_numpy(dtype=np.int64)
 
     total_length = cumulative
     bin_count = 20000
@@ -55,17 +85,19 @@ def main() -> None:
     bin_chrom = []
     for mid in bin_table["bin_mid"]:
         found = None
-        for chrom in sorted(chrom_offsets):
+        for chrom in fai["chrom"]:
             start = chrom_offsets[chrom]
             end = start + chrom_lengths[chrom]
             if start <= mid <= end:
                 found = chrom
                 break
-        bin_chrom.append(found if found is not None else max(chrom_offsets))
+        bin_chrom.append(found if found is not None else fai["chrom"].iloc[-1])
     bin_table["chrom"] = bin_chrom
-    bin_table["color_group"] = bin_table["chrom"] % 2
+    chrom_to_group = {chrom: idx % 2 for idx, chrom in enumerate(fai["chrom"])}
+    bin_table["color_group"] = bin_table["chrom"].map(chrom_to_group)
 
-    np.save(outdir / "chrom.npy", bim["chrom"].to_numpy(dtype=np.int16))
+    max_len = max(len(chrom) for chrom in bim["chrom_name"].astype(str)) if not bim.empty else 1
+    np.save(outdir / "chrom.npy", bim["chrom_name"].astype(str).to_numpy(dtype=f"<U{max_len}"))
     np.save(outdir / "pos.npy", bim["pos"].to_numpy(dtype=np.int32))
     np.save(outdir / "cum_pos.npy", cum_pos)
     np.save(outdir / "bin_index.npy", bin_index)

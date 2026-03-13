@@ -37,6 +37,12 @@ Set these when filenames or tool paths differ from defaults:
 - `PLINK_BIN`
 - `EMMAX_BIN`
 
+## Workspace model
+
+- The skill repository contains the scripts.
+- `GWAS_WORKSPACE_DIR` points to the project workspace that contains `data/` and receives `analysis/`.
+- You should run `bash scripts/run_full_pipeline.sh` from inside the `skills/gwas-skill/` directory, while `GWAS_WORKSPACE_DIR` points to the external workspace.
+
 ## Minimal launch example
 
 ```bash

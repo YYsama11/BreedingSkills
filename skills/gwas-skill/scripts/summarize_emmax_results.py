@@ -196,7 +196,7 @@ def process_trait(row: dict[str, str], results_dir: str, outdir: str) -> dict[st
         "significant_snp_count": int(sig_mask.sum()),
         "suggestive_snp_count": int(suggestive_mask.sum()),
         "top_snp_id": df.loc[top_idx, "snp_id"],
-        "top_chrom": int(chrom[top_idx]),
+        "top_chrom": str(chrom[top_idx]),
         "top_pos": int(pos[top_idx]),
         "top_beta": float(df.loc[top_idx, "beta"]),
         "top_se": float(df.loc[top_idx, "se"]),

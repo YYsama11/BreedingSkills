@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import os
-import shlex
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -25,8 +23,9 @@ def parse_args() -> argparse.Namespace:
 def run_one(row: pd.Series, tped_prefix: str, kinship: str, covariates: str, workspace: str) -> tuple[str, int]:
     trait_id = row["trait_id"]
     pheno_file = row["phenotype_file"]
-    wrapper = Path(workspace) / "scripts" / "run_with_top.sh"
-    runner = Path(workspace) / "scripts" / "run_emmax_trait.sh"
+    script_dir = Path(__file__).resolve().parent
+    wrapper = script_dir / "run_with_top.sh"
+    runner = script_dir / "run_emmax_trait.sh"
     cmd = [
         str(wrapper),
         f"emmax_{trait_id}",

@@ -1,6 +1,6 @@
-# BreedingSkill
+# BreedingSkills
 
-`BreedingSkill` is a growing repository of reusable breeding-analysis skills.
+`BreedingSkills` is a growing repository of reusable breeding-analysis skills.
 
 This project is designed as a **multi-skill collection**, where each skill lives in its own subdirectory under `skills/` and can be maintained independently.
 
@@ -16,7 +16,7 @@ Current and future directions include:
 ## Repository layout
 
 ```text
-BreedingSkill/
+BreedingSkills/
 ├── LICENSE
 ├── README.md
 └── skills/

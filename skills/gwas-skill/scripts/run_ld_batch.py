@@ -20,8 +20,9 @@ def parse_args() -> argparse.Namespace:
 
 def run_one(lead_snp: str, bfile_prefix: str, workspace: str) -> tuple[str, int]:
     workspace_path = Path(workspace)
-    wrapper = workspace_path / "scripts" / "run_with_top.sh"
-    runner = workspace_path / "scripts" / "run_ld_for_lead.sh"
+    script_dir = Path(__file__).resolve().parent
+    wrapper = script_dir / "run_with_top.sh"
+    runner = script_dir / "run_ld_for_lead.sh"
     outdir = workspace_path / "analysis" / "qtl" / "ld"
     outdir.mkdir(parents=True, exist_ok=True)
     safe_name = lead_snp.replace(":", "_")
