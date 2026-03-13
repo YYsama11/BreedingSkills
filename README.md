@@ -1,61 +1,106 @@
 # BreedingSkills
 
-`BreedingSkills` is a growing repository of reusable breeding-analysis skills.
+`BreedingSkills` is a modular collection of reusable breeding-analysis skills.
 
-This project is designed as a **multi-skill collection**, where each skill lives in its own subdirectory under `skills/` and can be maintained independently.
+The repository is organized around separate analysis stages so that users can enter the workflow at the stage that matches their data:
 
-Current and future directions include:
+- raw resequencing reads
+- GWAS-ready genotype resources
+- GWAS significant SNP results
 
-- GWAS
-- transposon analysis
-- pangenome analysis
-- structural variation analysis
-- population genetics
-- other breeding-oriented genomics workflows
+---
 
-## Repository layout
+## Repository structure
 
 ```text
 BreedingSkills/
 ├── LICENSE
 ├── README.md
 └── skills/
+    ├── resequencing-prep-skill/
     ├── gwas-skill/
+    ├── qtl-skill/
     ├── transposon-skill/     # future
     ├── pangenome-skill/      # future
     └── ...
 ```
 
+---
+
 ## Included skills
 
-### `gwas-skill`
+### 1. `resequencing-prep-skill`
 
-Location:
+Purpose:
 
-- `skills/gwas-skill`
+- start from raw resequencing reads
+- align reads to a reference genome
+- call SNPs
+- convert results into `EMMAX`-ready genotype resources
 
-This skill packages a reusable high-throughput GWAS workflow derived from a real large-scale omics association run. It includes:
+Outputs include:
 
-- replicate-aware phenotype aggregation
-- INT transformation
-- PLINK-based genotype preparation
-- EMMAX batch GWAS
-- Manhattan / QQ / significant SNP summaries
-- global lead-locus QTL calling
-- candidate gene extraction
-- network and subgroup frequency analysis
+- `genotype_panel.tped/tfam`
+- PLINK files
+- kinship matrix
+- PCA
+- covariates
 
-See:
+### 2. `gwas-skill`
 
-- `skills/gwas-skill/README.md`
-- `skills/gwas-skill/SKILL.md`
+Purpose:
 
-## Expansion strategy
+- run the core GWAS stage
+- start from phenotype matrix plus `EMMAX`-ready genotype inputs
+- generate Manhattan plots, QQ plots, and significant SNP summaries
 
-New skills should be added as siblings under `skills/`, for example:
+This skill intentionally excludes:
 
-- `skills/transposon-skill`
-- `skills/pangenome-skill`
-- `skills/sv-skill`
+- raw read processing
+- QTL interpretation
+- project-specific phenotype subclassification
 
-This keeps the repository modular and suitable both as a GitHub project and as a reusable analysis skill collection.
+### 3. `qtl-skill`
+
+Purpose:
+
+- interpret GWAS signals at the locus level
+- generate lead loci
+- compute LD-supported QTL intervals
+- annotate SNP positions
+- collect candidate genes
+- identify representative genes per QTL
+
+---
+
+## Design philosophy
+
+This repository separates three different analysis responsibilities:
+
+1. **resequencing preparation**
+2. **core GWAS**
+3. **QTL and candidate-gene interpretation**
+
+This separation improves:
+
+- portability
+- maintainability
+- reuse across projects
+- compatibility with different data starting points
+
+---
+
+## Recommended use
+
+- Start with `resequencing-prep-skill` if you only have raw `FASTQ` files.
+- Start with `gwas-skill` if you already have `EMMAX`-ready inputs.
+- Start with `qtl-skill` if you already have GWAS significant SNP outputs and want downstream biological interpretation.
+
+---
+
+## Planned future skills
+
+- `transposon-skill`
+- `pangenome-skill`
+- `sv-skill`
+- additional breeding-oriented genomics workflows

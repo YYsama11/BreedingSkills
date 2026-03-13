@@ -1,54 +1,73 @@
 # Input Contract
 
-## Required files
+## Required inputs
 
-Default layout assumes a working directory with a `data/` folder containing:
+The core GWAS skill assumes the following required files:
 
-- `sample_ids.txt` — target sample IDs, one per line
-- `phenotype_matrix.tsv` — phenotype table with metadata columns followed by replicate columns such as `SampleA_1`
-- `genotype_panel.tped` and `genotype_panel.tfam` — genotype prefix
-- `kinship_matrix.tsv` — kinship matrix matching the full `.tfam` order
-- `covariates.tsv` — covariates matching the full `.tfam` order
-- `annotation.gff3` — annotation GFF
-- `reference.fa.fai` — reference index for chromosome lengths
+- `trait_matrix.tsv`
+- `genotype_panel.tped`
+- `genotype_panel.tfam`
+- `kinship_matrix.tsv`
+- `covariates.tsv`
 
-## Important assumptions
+## Optional inputs
 
-- Replicates are identified by suffixes `_1`, `_2`, `_3`.
-- Replicates do not need to be adjacent; grouping is done by sample ID prefix.
-- `EMMAX` uses `tped/tfam`, kinship, and phenotype files aligned to the subset `.tfam` order.
-- The candidate-gene workflow expects annotation coordinates in the same reference system as the genotype SNP positions.
+- `trait_metadata.tsv`
+- `reference.fa.fai`
+
+## Trait matrix format
+
+The phenotype matrix must contain:
+
+- column 1: `FID`
+- column 2: `IID`
+- column 3 onward: one or more quantitative traits
+
+Example:
+
+```text
+FID   IID   trait_1   trait_2   trait_3
+S1    S1    1.2       3.4       5.6
+S2    S2    2.3       4.5       6.7
+```
+
+## Trait metadata format
+
+Optional file with columns:
+
+- `trait_id`
+- `trait_level`
+- `display_name`
+
+If this file is not provided, the workflow automatically uses:
+
+- `trait_id = column name`
+- `trait_level = trait`
+- `display_name = trait_id`
+
+## Covariate format
+
+The covariate file must contain:
+
+- column 1: `FID`
+- column 2: `IID`
+- column 3 onward: one or more numeric covariates
 
 ## Environment variables
 
-Set these when filenames or tool paths differ from defaults:
-
-- `GWAS_WORKSPACE_DIR` — root analysis directory
-- `GWAS_DATA_DIR` — input data directory, default `${GWAS_WORKSPACE_DIR}/data`
-- `GWAS_ID_FILE`
-- `GWAS_LIPID_FILE`
-- `GWAS_GENO_PREFIX`
-- `GWAS_KINSHIP_FILE`
-- `GWAS_COVARIATE_FILE`
-- `GWAS_GFF_FILE`
-- `GWAS_FASTA_FAI_FILE`
+- `GWAS_WORKSPACE_DIR`
+- `GWAS_DATA_DIR`
+- `GWAS_TRAIT_MATRIX`
+- `GWAS_TRAIT_META` (optional)
+- `GWAS_TPED_PREFIX`
+- `GWAS_KINSHIP`
+- `GWAS_COVARIATES`
+- `GWAS_FASTA_FAI_FILE` (optional)
 - `GWAS_THREADS`
 - `GWAS_EMMAX_PARALLEL`
-- `PLINK_BIN`
 - `EMMAX_BIN`
 
-## Workspace model
+## Notes
 
-- The skill repository contains the scripts.
-- `GWAS_WORKSPACE_DIR` points to the project workspace that contains `data/` and receives `analysis/`.
-- You should run `bash scripts/run_full_pipeline.sh` from inside the `skills/gwas-skill/` directory, while `GWAS_WORKSPACE_DIR` points to the external workspace.
-
-## Minimal launch example
-
-```bash
-export GWAS_WORKSPACE_DIR=/path/to/project
-export GWAS_DATA_DIR=/path/to/project/data
-export GWAS_THREADS=6
-export GWAS_EMMAX_PARALLEL=10
-bash scripts/run_full_pipeline.sh
-```
+- If `GWAS_FASTA_FAI_FILE` is missing, chromosome lengths are inferred from the genotype position file.
+- This skill assumes `EMMAX`-ready inputs already exist.

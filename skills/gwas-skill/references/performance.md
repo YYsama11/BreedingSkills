@@ -1,61 +1,43 @@
 # Performance Notes
 
-## Main bottlenecks
+## Main scaling factors
 
-### 1. EMMAX over many traits
+Core GWAS runtime is driven mainly by:
 
-For thousands of phenotypes, the dominant cost is:
-
-- number of phenotypes
+- number of traits
 - number of SNPs
-- per-trait repeated mixed-model fitting
+- degree of trait-level parallelism
 
-Recommended controls:
+## Current design choices
 
-- `GWAS_EMMAX_PARALLEL=10` was workable in the reference run
-- keep `GWAS_THREADS` modest on shared servers because PLINK and downstream array work can oversubscribe cores
+### 1. Trait-wise EMMAX execution
 
-### 2. GWAS summary generation
+`EMMAX` is used trait by trait in parallel.  
+This is simple, explicit, and works well for large phenotype panels.
 
-Naively re-reading and re-plotting every trait is slow. This skill keeps:
+### 2. Resumable summary generation
 
-- per-trait cached summary files
-- existing Manhattan/QQ/top-hit outputs
-- resumable aggregation behavior
+The GWAS summarization script caches:
 
-### 3. QTL calling
+- per-trait summaries
+- top-hit tables
+- significant SNP tables
+- Manhattan plots
+- QQ plots
 
-Do **not** expand LD per trait when many traits share the same locus.
+This avoids recomputing all outputs after interruption.
 
-Use:
+### 3. Conservative thread wrapper
 
-- unique significant SNPs
-- then global nonredundant lead loci
-- then LD per global lead
+`scripts/run_with_top.sh`:
 
-This reduces impossible workloads to a tractable number of LD jobs.
-
-### 4. SNP annotation
-
-Avoid row-wise interval scans over all genes.
-
-This skill uses:
-
-- chromosome-wise sorting
-- vectorized `searchsorted`
-- unique significant SNPs instead of trait-SNP rows
-
-## Practical thread policy
-
-The bundled `scripts/run_with_top.sh`:
-
-- snapshots `top` before each command
-- chooses a conservative thread count
+- checks `top`
+- estimates a safe thread count
 - exports `GWAS_THREADS`
-- records commands in `analysis/logs/runtime/command_manifest.tsv`
+- logs every command into `analysis/logs/runtime/command_manifest.tsv`
 
-## Recommended output discipline
+## Practical advice
 
-- keep raw EMMAX result files until summaries finish
-- only compress or clean `.ps` files after downstream summaries succeed
-- avoid writing trait-SNP-scale tables when SNP-scale tables carry the same information
+- Keep `GWAS_EMMAX_PARALLEL` modest on shared servers
+- Keep `GWAS_THREADS` modest when combining multiple parallel layers
+- Use the optional `FAI` input if you want cleaner cumulative chromosome plots

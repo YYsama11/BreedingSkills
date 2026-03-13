@@ -93,12 +93,23 @@ def main() -> None:
         lambda row: row["start"] - 1 if row["strand"] == "+" else row["end"] + args.promoter_length,
         axis=1,
     )
+    gene_df["downstream_start"] = gene_df.apply(
+        lambda row: row["end"] if row["strand"] == "+" else max(0, row["start"] - args.promoter_length - 1),
+        axis=1,
+    )
+    gene_df["downstream_end"] = gene_df.apply(
+        lambda row: row["end"] + args.promoter_length if row["strand"] == "+" else row["start"] - 1,
+        axis=1,
+    )
 
     gene_df[["chrom", "bed_start", "end", "gene_id", "strand"]].to_csv(
         outdir / "genes.bed", sep="\t", header=False, index=False
     )
     gene_df[["chrom", "promoter_start", "promoter_end", "gene_id", "strand"]].to_csv(
         outdir / "promoters_2kb.bed", sep="\t", header=False, index=False
+    )
+    gene_df[["chrom", "downstream_start", "downstream_end", "gene_id", "strand"]].to_csv(
+        outdir / "downstream_2kb.bed", sep="\t", header=False, index=False
     )
     gene_df.to_csv(outdir / "gene_metadata.tsv", sep="\t", index=False)
 

@@ -3,22 +3,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import fisher_exact
-
-
-LIPID_KEYWORDS = {
-    "fatty_acid_biosynthesis_elongation": [r"fatty acid", r"acyl-coa", r"elongase", r"ketoacyl", r"thiolase", r"acyl carrier"],
-    "desaturation": [r"desaturase", r"omega-3", r"omega-6"],
-    "glycerolipid_glycerophospholipid": [r"acyltransferase", r"phospholipase", r"glycerol", r"phosphatid", r"diacylglycerol", r"triacylglycerol", r"lipase"],
-    "sphingolipid": [r"sphing", r"ceramide"],
-    "sterol_wax": [r"sterol", r"wax", r"cutin", r"suberin"],
-    "lipid_transport_storage": [r"lipid transfer", r"abc transporter", r"oleosin", r"caleosin", r"lipid droplet"],
-}
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,8 +14,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lead-snps", required=True)
     parser.add_argument("--ld-dir", required=True)
     parser.add_argument("--master-significant", required=True)
-    parser.add_argument("--trait-summaries", required=True)
-    parser.add_argument("--annotation-dir", required=True)
+    parser.add_argument("--trait-summaries", required=False)
+    parser.add_argument("--annotation-dir", required=False)
+    parser.add_argument("--gene-annotation-file", required=False)
     parser.add_argument("--outdir", required=True)
     parser.add_argument("--module-membership", required=False)
     return parser.parse_args()
@@ -84,18 +73,7 @@ def load_ld_region(ld_file: Path, lead_row: pd.Series) -> dict[str, object]:
     }
 
 
-def classify_genes(candidate_df: pd.DataFrame) -> pd.DataFrame:
-    annot = (candidate_df["nr_annotation"].fillna("") + " ; " + candidate_df["pfam"].fillna("")).str.lower()
-    candidate_df["lipid_related"] = False
-    candidate_df["pathway_keyword"] = ""
-    for pathway, patterns in LIPID_KEYWORDS.items():
-        mask = annot.str.contains("|".join(patterns), regex=True)
-        candidate_df.loc[mask, "lipid_related"] = True
-        candidate_df.loc[mask & (candidate_df["pathway_keyword"] == ""), "pathway_keyword"] = pathway
-    return candidate_df
-
-
-def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFrame, exons: pd.DataFrame, cds: pd.DataFrame) -> pd.DataFrame:
+def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFrame, downstream: pd.DataFrame, exons: pd.DataFrame, cds: pd.DataFrame) -> pd.DataFrame:
     def build_lookup(df: pd.DataFrame) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
         lookup = {}
         for chrom, sub in df.groupby("chrom"):
@@ -129,6 +107,7 @@ def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFram
     cds_lookup = build_lookup(cds)
     exon_lookup = build_lookup(exons)
     prom_lookup = build_lookup(promoters)
+    downstream_lookup = build_lookup(downstream)
     gene_lookup = build_lookup(genes)
 
     parts = []
@@ -152,6 +131,12 @@ def annotate_snps(sig: pd.DataFrame, genes: pd.DataFrame, promoters: pd.DataFram
         if remaining.any():
             matched, genes_hit = query_interval(positions[remaining], prom_lookup.get(chrom))
             region[np.where(remaining)[0][matched]] = "promoter"
+            gene_ids[np.where(remaining)[0][matched]] = genes_hit[matched]
+
+        remaining = region == "intergenic"
+        if remaining.any():
+            matched, genes_hit = query_interval(positions[remaining], downstream_lookup.get(chrom))
+            region[np.where(remaining)[0][matched]] = "downstream_2kb"
             gene_ids[np.where(remaining)[0][matched]] = genes_hit[matched]
 
         remaining = region == "intergenic"
@@ -220,21 +205,24 @@ def build_hotspots(qtl: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(hotspot_rows)
 
 
-def keyword_enrichment(candidate: pd.DataFrame, gene_meta: pd.DataFrame) -> pd.DataFrame:
-    gene_meta = gene_meta.copy()
-    gene_meta["annot"] = (gene_meta["nr_annotation"].fillna("") + " ; " + gene_meta["pfam"].fillna("")).str.lower()
-    candidate_ids = set(candidate["gene_id"].dropna())
-    records = []
-    for pathway, patterns in LIPID_KEYWORDS.items():
-        bg_hit = gene_meta["annot"].str.contains("|".join(patterns), regex=True)
-        cand_hit = gene_meta["gene_id"].isin(candidate_ids) & bg_hit
-        a = int(cand_hit.sum())
-        b = int(len(candidate_ids) - a)
-        c = int(bg_hit.sum() - a)
-        d = int(gene_meta.shape[0] - a - b - c)
-        odds, p = fisher_exact([[a, b], [c, d]], alternative="greater")
-        records.append({"pathway_keyword": pathway, "candidate_hit": a, "candidate_total": len(candidate_ids), "background_hit": int(bg_hit.sum()), "background_total": int(gene_meta.shape[0]), "odds_ratio": odds, "p_value": p})
-    return pd.DataFrame(records).sort_values("p_value")
+def add_representative_genes(candidate: pd.DataFrame, qtl_regions: pd.DataFrame) -> pd.DataFrame:
+    if candidate.empty:
+        return pd.DataFrame(columns=["qtl_id", "representative_gene_id", "distance_to_lead", "reason"])
+    qtl_lead = qtl_regions.set_index("qtl_id")["lead_pos"].to_dict()
+    rep = candidate.copy()
+    rep["lead_pos"] = rep["qtl_id"].map(qtl_lead)
+    rep["distance_to_lead"] = rep.apply(
+        lambda row: 0
+        if row["start"] <= row["lead_pos"] <= row["end"]
+        else min(abs(row["start"] - row["lead_pos"]), abs(row["end"] - row["lead_pos"])),
+        axis=1,
+    )
+    rep["inside_lead_gene"] = rep.apply(lambda row: row["start"] <= row["lead_pos"] <= row["end"], axis=1)
+    rep = rep.sort_values(["qtl_id", "inside_lead_gene", "distance_to_lead", "gene_id"], ascending=[True, False, True, True])
+    rep = rep.drop_duplicates(subset=["qtl_id"]).copy()
+    rep["reason"] = rep["inside_lead_gene"].map(lambda x: "lead_snp_inside_gene" if x else "nearest_gene_to_lead_snp")
+    rep = rep.rename(columns={"gene_id": "representative_gene_id"})
+    return rep
 
 
 def assign_significant_to_qtl(sig: pd.DataFrame, qtl_loci: pd.DataFrame) -> pd.DataFrame:
@@ -278,20 +266,37 @@ def main() -> None:
         rename_map["trait_ids"] = "lead_trait_ids"
     if rename_map:
         lead = lead.rename(columns=rename_map)
-    summaries = pd.read_csv(args.trait_summaries, sep="\t")
-    annotation_dir = Path(args.annotation_dir)
-    gene_meta = pd.read_csv(annotation_dir / "gene_metadata.tsv", sep="\t")
-    genes = gene_meta.loc[:, ["chrom", "start", "end", "gene_id", "nr_annotation", "pfam"]].copy()
-    genes["chrom_norm"] = genes["chrom"].map(normalize_chrom_name)
-    promoters = pd.read_csv(annotation_dir / "promoters_2kb.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
-    promoters["start"] = promoters["start0"] + 1
-    promoters["chrom_norm"] = promoters["chrom"].map(normalize_chrom_name)
-    exons = pd.read_csv(annotation_dir / "exons.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
-    exons["start"] = exons["start0"] + 1
-    exons["chrom_norm"] = exons["chrom"].map(normalize_chrom_name)
-    cds = pd.read_csv(annotation_dir / "cds.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
-    cds["start"] = cds["start0"] + 1
-    cds["chrom_norm"] = cds["chrom"].map(normalize_chrom_name)
+    summaries = pd.read_csv(args.trait_summaries, sep="\t") if args.trait_summaries and Path(args.trait_summaries).exists() else pd.DataFrame(columns=["trait_id", "trait_level"])
+    annotation_available = bool(args.annotation_dir and Path(args.annotation_dir).exists())
+    if annotation_available:
+        annotation_dir = Path(args.annotation_dir)
+        gene_meta = pd.read_csv(annotation_dir / "gene_metadata.tsv", sep="\t")
+        if args.gene_annotation_file and Path(args.gene_annotation_file).exists():
+            extra_annot = pd.read_csv(args.gene_annotation_file, sep="\t")
+            if "gene_id" not in extra_annot.columns:
+                raise ValueError("Gene annotation file must contain a gene_id column.")
+            gene_meta = gene_meta.merge(extra_annot, on="gene_id", how="left", suffixes=("", "_extra"))
+        genes = gene_meta.loc[:, [col for col in gene_meta.columns if col in {"chrom", "start", "end", "gene_id", "nr_annotation", "pfam"} or col not in {"bed_start", "promoter_start", "promoter_end"}]].copy()
+        genes["chrom_norm"] = genes["chrom"].map(normalize_chrom_name)
+        promoters = pd.read_csv(annotation_dir / "promoters_2kb.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
+        promoters["start"] = promoters["start0"] + 1
+        promoters["chrom_norm"] = promoters["chrom"].map(normalize_chrom_name)
+        downstream = pd.read_csv(annotation_dir / "downstream_2kb.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
+        downstream["start"] = downstream["start0"] + 1
+        downstream["chrom_norm"] = downstream["chrom"].map(normalize_chrom_name)
+        exons = pd.read_csv(annotation_dir / "exons.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
+        exons["start"] = exons["start0"] + 1
+        exons["chrom_norm"] = exons["chrom"].map(normalize_chrom_name)
+        cds = pd.read_csv(annotation_dir / "cds.bed", sep="\t", header=None, names=["chrom", "start0", "end", "gene_id", "strand"])
+        cds["start"] = cds["start0"] + 1
+        cds["chrom_norm"] = cds["chrom"].map(normalize_chrom_name)
+    else:
+        gene_meta = pd.DataFrame(columns=["gene_id"])
+        genes = pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "nr_annotation", "pfam", "chrom_norm"])
+        promoters = pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "chrom_norm"])
+        downstream = pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "chrom_norm"])
+        exons = pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "chrom_norm"])
+        cds = pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "chrom_norm"])
 
     ld_dir = Path(args.ld_dir)
     ld_records = []
@@ -346,32 +351,34 @@ def main() -> None:
     hotspot.to_csv(outdir / "qtl_hotspots.tsv", sep="\t", index=False)
 
     candidate_rows = []
-    for _, row in qtl_regions.iterrows():
-        chrom_norm = row["chrom_norm"]
-        overlap = genes[(genes["chrom_norm"] == chrom_norm) & (genes["end"] >= row["qtl_start"]) & (genes["start"] <= row["qtl_end"])].copy()
-        if overlap.empty:
-            continue
-        overlap["qtl_id"] = row["qtl_id"]
-        overlap["lead_snp"] = row["snp_id"]
-        overlap["trait_ids"] = row.get("trait_ids", "")
-        overlap["trait_count"] = row.get("trait_count", 0)
-        candidate_rows.append(overlap)
-    candidate = pd.concat(candidate_rows, ignore_index=True) if candidate_rows else pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "nr_annotation", "pfam", "qtl_id", "lead_snp", "trait_ids", "trait_count"])
-    candidate = classify_genes(candidate)
+    if annotation_available:
+        for _, row in qtl_regions.iterrows():
+            chrom_norm = row["chrom_norm"]
+            overlap = genes[(genes["chrom_norm"] == chrom_norm) & (genes["end"] >= row["qtl_start"]) & (genes["start"] <= row["qtl_end"])].copy()
+            if overlap.empty:
+                continue
+            overlap["qtl_id"] = row["qtl_id"]
+            overlap["lead_snp"] = row["snp_id"]
+            overlap["trait_ids"] = row.get("trait_ids", "")
+            overlap["trait_count"] = row.get("trait_count", 0)
+            overlap["lead_pos"] = row["lead_pos"]
+            candidate_rows.append(overlap)
+    candidate = pd.concat(candidate_rows, ignore_index=True) if candidate_rows else pd.DataFrame(columns=["chrom", "start", "end", "gene_id", "nr_annotation", "pfam", "qtl_id", "lead_snp", "trait_ids", "trait_count", "lead_pos"])
     candidate.to_csv(outdir / "candidate_genes.tsv", sep="\t", index=False)
-    candidate.loc[candidate["lipid_related"]].to_csv(outdir / "candidate_genes_lipid_related.tsv", sep="\t", index=False)
+    representative = add_representative_genes(candidate, qtl_regions)
+    representative.to_csv(outdir / "qtl_representative_genes.tsv", sep="\t", index=False)
 
-    unique_sig_path = outdir / "unique_significant_snps.tsv"
-    if unique_sig_path.exists():
-        unique_sig = pd.read_csv(unique_sig_path, sep="\t").loc[:, ["snp_id", "chrom", "pos"]].drop_duplicates().copy()
+    if annotation_available:
+        unique_sig_path = outdir / "unique_significant_snps.tsv"
+        if unique_sig_path.exists():
+            unique_sig = pd.read_csv(unique_sig_path, sep="\t").loc[:, ["snp_id", "chrom", "pos"]].drop_duplicates().copy()
+        else:
+            unique_sig = pd.read_csv(args.master_significant, sep="\t", usecols=["snp_id", "chrom", "pos"]).drop_duplicates().copy()
+        unique_sig["trait_id"] = "multi_trait"
+        snp_anno = annotate_snps(unique_sig, genes, promoters[["chrom", "start", "end", "gene_id"]], downstream[["chrom", "start", "end", "gene_id"]], exons[["chrom", "start", "end", "gene_id"]], cds[["chrom", "start", "end", "gene_id"]])
+        snp_anno.to_csv(outdir / "significant_snp_annotation.tsv.gz", sep="\t", index=False)
     else:
-        unique_sig = pd.read_csv(args.master_significant, sep="\t", usecols=["snp_id", "chrom", "pos"]).drop_duplicates().copy()
-    unique_sig["trait_id"] = "multi_trait"
-    snp_anno = annotate_snps(unique_sig, genes, promoters[["chrom", "start", "end", "gene_id"]], exons[["chrom", "start", "end", "gene_id"]], cds[["chrom", "start", "end", "gene_id"]])
-    snp_anno.to_csv(outdir / "significant_snp_annotation.tsv.gz", sep="\t", index=False)
-
-    enrich = keyword_enrichment(candidate, gene_meta)
-    enrich.to_csv(outdir / "lipid_pathway_keyword_enrichment.tsv", sep="\t", index=False)
+        pd.DataFrame(columns=["snp_id", "trait_id", "chrom", "pos", "region_type", "gene_id"]).to_csv(outdir / "significant_snp_annotation.tsv.gz", sep="\t", index=False)
 
     qtl_trait_counts = qtl_regions.loc[:, ["qtl_id", "trait_count", "trait_ids", "lipid_count"]].copy()
     qtl_trait_counts.to_csv(outdir / "qtl_trait_counts.tsv", sep="\t", index=False)
