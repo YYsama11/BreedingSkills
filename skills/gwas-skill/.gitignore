@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+analysis/
+data/
+tmp/
+*.log
+*.nosex
