@@ -24,6 +24,7 @@ Mandatory outputs:
 - lead loci
 - LD-based QTL intervals
 - QTL hotspot table
+- QTL summary figure(s) when plotting tables are provided
 
 Optional outputs:
 
@@ -73,6 +74,7 @@ but skips gene-based outputs.
 - `analysis/qtl/qtl_trait_membership.tsv`
 - `analysis/qtl/qtl_trait_counts.tsv`
 - `analysis/qtl/qtl_size_stats.tsv`
+- QTL plotting tables and rendered summary figures when plotting is enabled
 
 If annotation is available:
 
@@ -87,12 +89,15 @@ If annotation is available:
 ```text
 scripts/
 ├── run_qtl_pipeline.sh
+├── run_qtl_plot.sh
 ├── run_with_top.sh
 ├── prepare_gene_annotation.py
 ├── prepare_qtl_leads.py
 ├── run_ld_batch.py
 ├── run_ld_for_lead.sh
-└── integrate_qtl_candidates.py
+├── integrate_qtl_candidates.py
+├── plot_ld_qtl_summary.R
+└── make_qtl_plot_demo_data.py
 ```
 
 ---
@@ -102,3 +107,10 @@ scripts/
 - Hotspots are built from merged overlapping QTL intervals, not from a simple filter on large trait counts.
 - Representative genes are workflow heuristics, not confirmed causal genes.
 - If annotation chromosome names and GWAS chromosome names differ, the workflow attempts normalized matching rather than forcing `ChrN` naming.
+- Plotting accepts layered inputs: minimal plotting tables draw the core figure, while richer inputs enable highlighted genes and richer local panels.
+
+## Plotting references
+
+- `references/plot_input_contract.md`
+- `examples/basic/`
+- `examples/rich/`

@@ -1,0 +1,5 @@
+locus_id	snp_id	chrom	bp	mlog10_p	r2	is_lead
+L001	1:760000	1	760000	4.2	0.3	False
+L001	1:800000	1	800000	8.0	1.0	True
+L001	1:850000	1	850000	7.2	0.8	False
+L001	1:900000	1	900000	3.8	0.2	False

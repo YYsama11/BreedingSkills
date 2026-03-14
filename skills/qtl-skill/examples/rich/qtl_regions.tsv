@@ -1,0 +1,3 @@
+locus_id	chrom	lead_snp_id	lead_bp	lead_p	qtl_start	qtl_end	panel_start	panel_end	qtl_type
+L001	1	1:800000	800000	1e-08	760000	880000	650000	950000	genomewide
+L002	2	2:500000	500000	2e-07	450000	600000	350000	700000	suggestive

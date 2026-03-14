@@ -1,0 +1,4 @@
+gene_id	chrom	start_bp	end_bp	strand
+GeneA	1	700000	780000	+
+GeneB	1	795000	860000	-
+GeneC	1	880000	930000	+

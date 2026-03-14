@@ -51,4 +51,22 @@ Outputs:
 - candidate genes
 - representative genes
 
+## Phase 5 — QTL plotting
+
+- `scripts/plot_ld_qtl_summary.R`
+- `scripts/run_qtl_plot.sh`
+
+Inputs:
+
+- plotting tables described in `references/plot_input_contract.md`
+
+Outputs:
+
+- global Manhattan + local QTL + gene track summary figure
+
+The plotting layer is intentionally decoupled from the core QTL logic so users can provide:
+
+- only the minimal plotting tables
+- or richer tables with highlight genes and LD values
+
 Annotation-dependent outputs are skipped if annotation is unavailable.
