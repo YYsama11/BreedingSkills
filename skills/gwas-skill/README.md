@@ -146,7 +146,6 @@ The scripts remain inside the skill directory and are not expected to be copied 
 
 - `analysis/gwas/emmax/results/*.ps`
 - `analysis/gwas/emmax/results/*.reml`
-- `analysis/gwas/emmax/results/*.log`
 
 ### Summaries
 
@@ -174,6 +173,8 @@ Optional standalone plotting entrypoint:
 - This skill does not require annotation or QTL support.
 - QTL, LD, and candidate-gene interpretation are intentionally separated into `qtl-skill`.
 - A standalone R plotting script is included for Manhattan + QQ rendering from generic GWAS tables.
+- By default, tool-generated `.log` files are removed after successful execution.
+- By default, runtime tracing keeps `analysis/logs/runtime/command_manifest.tsv` and does not retain per-command `*.cmd.log` / `*.top.log` files unless requested.
 
 ---
 

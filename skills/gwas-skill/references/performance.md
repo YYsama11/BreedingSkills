@@ -34,10 +34,12 @@ This avoids recomputing all outputs after interruption.
 - checks `top`
 - estimates a safe thread count
 - exports `GWAS_THREADS`
-- logs every command into `analysis/logs/runtime/command_manifest.tsv`
+- always records every command into `analysis/logs/runtime/command_manifest.tsv`
+- only keeps per-command runtime log files if `KEEP_RUNTIME_LOGS=true`
 
 ## Practical advice
 
 - Keep `GWAS_EMMAX_PARALLEL` modest on shared servers
 - Keep `GWAS_THREADS` modest when combining multiple parallel layers
 - Use the optional `FAI` input if you want cleaner cumulative chromosome plots
+- Keep `KEEP_TOOL_LOGS=false` unless detailed tool debugging is needed

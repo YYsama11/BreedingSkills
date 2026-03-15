@@ -81,6 +81,9 @@ def main() -> None:
             raise ValueError(f"Unable to map variant chromosome names to FAI chromosome names: {unresolved[:20]}")
         variants["chrom_name"] = variants["chrom"].map(chrom_map)
         chrom_order = fai["chrom"].tolist()
+        variant_max = variants.groupby("chrom_name")["pos"].max().astype(int).to_dict()
+        for chrom, max_pos in variant_max.items():
+            chrom_lengths[chrom] = max(chrom_lengths.get(chrom, 0), max_pos)
     else:
         variants["chrom_name"] = variants["chrom"].astype(str)
         chrom_order = list(dict.fromkeys(variants["chrom_name"].tolist()))
@@ -98,7 +101,7 @@ def main() -> None:
     total_length = max(cumulative, 1)
     bin_count = 20000
     bin_index = np.floor(cum_pos / total_length * bin_count).astype(np.int32)
-    bin_index[bin_index == bin_count] = bin_count - 1
+    np.clip(bin_index, 0, bin_count - 1, out=bin_index)
 
     bin_table = pd.DataFrame({"bin_index": np.arange(bin_count)})
     bin_table["bin_start"] = np.floor(bin_table["bin_index"] * total_length / bin_count).astype(int)

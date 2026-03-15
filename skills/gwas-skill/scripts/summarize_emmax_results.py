@@ -62,6 +62,8 @@ def load_reml_value(results_dir: Path, trait_id: str) -> float | None:
 def make_manhattan(trait_id: str, chrom: np.ndarray, cum_pos: np.ndarray, p: np.ndarray, out_png: Path) -> None:
     bins = GLOBAL["bins"].copy()
     bin_index = np.asarray(GLOBAL["bin_index"])
+    if bin_index.size:
+        bin_index = np.clip(bin_index, 0, bins.shape[0] - 1)
     min_p = np.full(bins.shape[0], np.inf, dtype=float)
     np.minimum.at(min_p, bin_index, p)
     bins["min_p"] = min_p

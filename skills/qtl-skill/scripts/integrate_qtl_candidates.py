@@ -36,7 +36,7 @@ def load_ld_region(ld_file: Path, lead_row: pd.Series) -> dict[str, object]:
     if not ld_file.exists() or ld_file.stat().st_size == 0:
         return {
             "lead_snp": lead_row["snp_id"],
-            "chrom": int(lead_row["chrom"]),
+            "chrom": str(lead_row["chrom"]),
             "lead_pos": int(lead_row["pos"]),
             "qtl_start": int(lead_row["pos"]),
             "qtl_end": int(lead_row["pos"]),
@@ -48,7 +48,7 @@ def load_ld_region(ld_file: Path, lead_row: pd.Series) -> dict[str, object]:
     if ld.empty:
         return {
             "lead_snp": lead_row["snp_id"],
-            "chrom": int(lead_row["chrom"]),
+            "chrom": str(lead_row["chrom"]),
             "lead_pos": int(lead_row["pos"]),
             "qtl_start": int(lead_row["pos"]),
             "qtl_end": int(lead_row["pos"]),
@@ -63,7 +63,7 @@ def load_ld_region(ld_file: Path, lead_row: pd.Series) -> dict[str, object]:
     qtl_end = int(high_ld["BP_B"].max())
     return {
         "lead_snp": lead_row["snp_id"],
-        "chrom": int(lead_row["chrom"]),
+        "chrom": str(lead_row["chrom"]),
         "lead_pos": int(lead_row["pos"]),
         "qtl_start": qtl_start,
         "qtl_end": qtl_end,

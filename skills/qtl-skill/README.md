@@ -112,6 +112,8 @@ scripts/
 - Plotting accepts layered inputs: minimal plotting tables draw the core figure, while richer inputs enable highlighted genes and richer local panels.
 - The default plotting wrapper uses the Python plotting script derived from the BSA plotting layout.
 - The R plotting script is retained as an alternate renderer derived from the earlier LD/QTL summary style.
+- LD `.nosex` files are removed after successful execution by default.
+- Tool-generated `.log` files are removed after successful execution unless `KEEP_TOOL_LOGS=true`.
 
 ## Plotting references
 

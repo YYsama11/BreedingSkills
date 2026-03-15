@@ -25,6 +25,12 @@ Outputs:
 - `covariates.tsv`
 - `sample_ids.txt`
 
+By default:
+
+- `sample_ids.txt` is kept as an interface file for downstream steps
+- tool-generated `.log` files are removed after successful execution
+- `.nosex` files are removed after successful execution
+
 ---
 
 ## Main stages

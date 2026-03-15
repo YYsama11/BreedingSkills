@@ -13,15 +13,19 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 workspace_dir="${GWAS_WORKSPACE_DIR:-$(cd "${script_dir}/.." && pwd)}"
 log_dir="${workspace_dir}/analysis/logs/runtime"
 mkdir -p "${log_dir}"
+keep_runtime_logs="$(printf '%s' "${KEEP_RUNTIME_LOGS:-false}" | tr '[:upper:]' '[:lower:]')"
 
 timestamp="$(date '+%Y%m%d_%H%M%S')"
 top_log="${log_dir}/${timestamp}_${log_prefix}.top.log"
 cmd_log="${log_dir}/${timestamp}_${log_prefix}.cmd.log"
 manifest="${log_dir}/command_manifest.tsv"
 
-top -bn1 | head -n 8 | tee "${top_log}"
+top_snapshot="$(top -bn1 | head -n 8)"
+if [[ "${keep_runtime_logs}" == "true" ]]; then
+  printf '%s\n' "${top_snapshot}" | tee "${top_log}"
+fi
 
-idle="$(awk -F',' '/%Cpu/{for(i=1;i<=NF;i++){if($i ~ / id/){gsub(/[^0-9.]/,\"\",$i); print $i; exit}}}' "${top_log}")"
+idle="$(printf '%s\n' "${top_snapshot}" | awk -F',' '/%Cpu/{for(i=1;i<=NF;i++){if($i ~ / id/){gsub(/[^0-9.]/,\"\",$i); print $i; exit}}}')"
 if [[ -z "${idle}" ]]; then
   idle="0"
 fi
@@ -62,4 +66,4 @@ printf "%s\t%s\t%s\t%s\t%s\n" \
   echo "[run_with_top] recommended_threads=${threads}"
   echo "[run_with_top] command=$*"
   "$@"
-} 2>&1 | tee "${cmd_log}"
+} 2>&1 | if [[ "${keep_runtime_logs}" == "true" ]]; then tee "${cmd_log}"; else cat; fi

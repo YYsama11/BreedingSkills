@@ -36,7 +36,6 @@ Outputs:
 
 - `analysis/gwas/emmax/results/*.ps`
 - `analysis/gwas/emmax/results/*.reml`
-- `analysis/gwas/emmax/results/*.log`
 
 ## Phase 3 — Build SNP reference arrays
 
@@ -77,6 +76,12 @@ Outputs:
 - `scripts/run_gwas_plot.sh`
 
 This optional layer renders Manhattan + QQ directly from a generic GWAS result table.
+
+## Logging behavior
+
+- `analysis/logs/runtime/command_manifest.tsv` is always kept
+- per-command runtime `*.cmd.log` and `*.top.log` are only kept if `KEEP_RUNTIME_LOGS=true`
+- tool-generated `*.log` files are removed after successful execution unless `KEEP_TOOL_LOGS=true`
 
 ## What this workflow deliberately excludes
 

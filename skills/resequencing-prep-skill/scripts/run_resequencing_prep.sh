@@ -23,6 +23,8 @@ samtools_bin="${SAMTOOLS_BIN:-$(command -v samtools 2>/dev/null || true)}"
 bcftools_bin="${BCFTOOLS_BIN:-$(command -v bcftools 2>/dev/null || true)}"
 plink_bin="${PLINK_BIN:-$(command -v plink 2>/dev/null || true)}"
 emmax_kin_bin="${EMMAX_KIN_BIN:-$(command -v emmax-kin-intel64 2>/dev/null || true)}"
+keep_tool_logs="$(printf '%s' "${KEEP_TOOL_LOGS:-false}" | tr '[:upper:]' '[:lower:]')"
+clean_nosex="$(printf '%s' "${CLEAN_NOSEX:-true}" | tr '[:upper:]' '[:lower:]')"
 
 for tool_name in aligner samtools_bin bcftools_bin plink_bin emmax_kin_bin; do
   if [[ -z "${!tool_name}" ]]; then
@@ -92,10 +94,22 @@ geno_prefix="${outdir}/genotype/genotype_panel"
 
 if [[ ! -f "${geno_prefix}.bed" ]]; then
   "${plink_bin}" --vcf "${snps_vcf}" --double-id --allow-extra-chr --make-bed --out "${geno_prefix}"
+  if [[ "${keep_tool_logs}" != "true" ]]; then
+    rm -f "${geno_prefix}.log"
+  fi
+  if [[ "${clean_nosex}" == "true" ]]; then
+    rm -f "${geno_prefix}.nosex"
+  fi
 fi
 
 if [[ ! -f "${geno_prefix}.tped" ]]; then
   "${plink_bin}" --vcf "${snps_vcf}" --double-id --allow-extra-chr --recode transpose --out "${geno_prefix}"
+  if [[ "${keep_tool_logs}" != "true" ]]; then
+    rm -f "${geno_prefix}.log"
+  fi
+  if [[ "${clean_nosex}" == "true" ]]; then
+    rm -f "${geno_prefix}.nosex"
+  fi
 fi
 
 if [[ ! -f "${outdir}/genotype/kinship_matrix.tsv" ]]; then
@@ -104,10 +118,22 @@ fi
 
 if [[ ! -f "${outdir}/genotype/genotype_panel_prune.prune.in" ]]; then
   "${plink_bin}" --bfile "${geno_prefix}" --indep-pairwise 50 5 0.2 --allow-no-sex --out "${outdir}/genotype/genotype_panel_prune"
+  if [[ "${keep_tool_logs}" != "true" ]]; then
+    rm -f "${outdir}/genotype/genotype_panel_prune.log"
+  fi
+  if [[ "${clean_nosex}" == "true" ]]; then
+    rm -f "${outdir}/genotype/genotype_panel_prune.nosex"
+  fi
 fi
 
 if [[ ! -f "${outdir}/genotype/genotype_panel_pca.eigenvec" ]]; then
   "${plink_bin}" --bfile "${geno_prefix}" --extract "${outdir}/genotype/genotype_panel_prune.prune.in" --pca 10 --allow-no-sex --out "${outdir}/genotype/genotype_panel_pca"
+  if [[ "${keep_tool_logs}" != "true" ]]; then
+    rm -f "${outdir}/genotype/genotype_panel_pca.log"
+  fi
+  if [[ "${clean_nosex}" == "true" ]]; then
+    rm -f "${outdir}/genotype/genotype_panel_pca.nosex"
+  fi
 fi
 
 python3 "${script_dir}/make_covariates_from_pca.py" --eigenvec "${outdir}/genotype/genotype_panel_pca.eigenvec" --out "${outdir}/genotype/covariates.tsv" --num-pcs "${num_pcs}" --include-intercept
