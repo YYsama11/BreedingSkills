@@ -59,6 +59,11 @@ for skill_name in "${skills[@]}"; do
     echo "Linked ${skill_name} -> ${dst}"
   else
     cp -a "${src}" "${dst}"
+    if [[ -d "${dst}/scripts" ]]; then
+      find "${dst}/scripts" -type f -name "*.sh" -exec chmod +x {} \;
+      find "${dst}/scripts" -type f -name "*.py" -exec chmod +x {} \;
+      find "${dst}/scripts" -type f -name "*.R" -exec chmod +x {} \;
+    fi
     echo "Copied ${skill_name} -> ${dst}"
   fi
 done
