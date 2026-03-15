@@ -61,21 +61,9 @@ bash scripts/install_to_local_skills.sh
 bash scripts/install_to_local_skills.sh gwas-skill
 ```
 
-### Install as symlinks for development
-
-```bash
-bash scripts/install_to_local_skills.sh --symlink
-```
-
 By default, the install target is:
 
 - `${LOCAL_SKILLS_HOME:-$HOME/.local/skills}`
-
-### Skill order
-
-See:
-
-- `skills/INDEX.md`
 
 <details>
 <summary><strong>gwas-skill</strong></summary>
