@@ -89,6 +89,7 @@ If annotation is available:
 ```text
 scripts/
 ├── run_qtl_pipeline.sh
+├── build_qtl_plot_tables.py
 ├── run_qtl_plot.sh
 ├── run_with_top.sh
 ├── prepare_gene_annotation.py
@@ -96,6 +97,7 @@ scripts/
 ├── run_ld_batch.py
 ├── run_ld_for_lead.sh
 ├── integrate_qtl_candidates.py
+├── plot_gwas_qtl_summary.py
 ├── plot_ld_qtl_summary.R
 └── make_qtl_plot_demo_data.py
 ```
@@ -108,9 +110,16 @@ scripts/
 - Representative genes are workflow heuristics, not confirmed causal genes.
 - If annotation chromosome names and GWAS chromosome names differ, the workflow attempts normalized matching rather than forcing `ChrN` naming.
 - Plotting accepts layered inputs: minimal plotting tables draw the core figure, while richer inputs enable highlighted genes and richer local panels.
+- The default plotting wrapper uses the Python plotting script derived from the BSA plotting layout.
+- The R plotting script is retained as an alternate renderer derived from the earlier LD/QTL summary style.
 
 ## Plotting references
 
 - `references/plot_input_contract.md`
 - `examples/basic/`
 - `examples/rich/`
+
+The plotting layer can be used in two ways:
+
+1. provide prebuilt plotting tables directly
+2. build plotting tables from GWAS/QTL outputs with `build_qtl_plot_tables.py`, then render them

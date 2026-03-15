@@ -71,6 +71,13 @@ Outputs:
 - shared SNP summary
 - pleiotropic SNP table
 
+## Optional standalone plotting
+
+- `scripts/plot_manhattan_qq.R`
+- `scripts/run_gwas_plot.sh`
+
+This optional layer renders Manhattan + QQ directly from a generic GWAS result table.
+
 ## What this workflow deliberately excludes
 
 The core GWAS skill does not include:

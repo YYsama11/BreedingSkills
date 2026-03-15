@@ -34,6 +34,10 @@ Use this skill for the core GWAS stage only.
 - significant SNP summaries
 - per-trait GWAS summary tables
 
+Optional standalone plotting:
+
+- Manhattan + QQ from a generic GWAS result table through `scripts/run_gwas_plot.sh`
+
 ## What this skill does not require
 
 This skill does **not** require:

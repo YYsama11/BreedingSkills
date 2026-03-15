@@ -66,6 +66,8 @@ skills/gwas-skill/
     ├── run_emmax_batch.py
     ├── run_emmax_trait.sh
     ├── prepare_snp_reference.py
+    ├── run_gwas_plot.sh
+    ├── plot_manhattan_qq.R
     └── summarize_emmax_results.py
 ```
 
@@ -159,6 +161,10 @@ The scripts remain inside the skill directory and are not expected to be copied 
 - `analysis/gwas/emmax/figures/manhattan/*.png`
 - `analysis/gwas/emmax/figures/qq/*.png`
 
+Optional standalone plotting entrypoint:
+
+- `scripts/run_gwas_plot.sh`
+
 ---
 
 ## Design constraints
@@ -167,6 +173,7 @@ The scripts remain inside the skill directory and are not expected to be copied 
 - This skill does not assume any phenotype domain such as lipids or metabolites.
 - This skill does not require annotation or QTL support.
 - QTL, LD, and candidate-gene interpretation are intentionally separated into `qtl-skill`.
+- A standalone R plotting script is included for Manhattan + QQ rendering from generic GWAS tables.
 
 ---
 

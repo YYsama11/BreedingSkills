@@ -53,12 +53,15 @@ Outputs:
 
 ## Phase 5 — QTL plotting
 
+- `scripts/build_qtl_plot_tables.py`
+- `scripts/plot_gwas_qtl_summary.py`
 - `scripts/plot_ld_qtl_summary.R`
 - `scripts/run_qtl_plot.sh`
 
 Inputs:
 
-- plotting tables described in `references/plot_input_contract.md`
+- either plotting tables described in `references/plot_input_contract.md`
+- or QTL/GWAS outputs that can be converted into those plotting tables
 
 Outputs:
 

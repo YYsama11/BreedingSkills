@@ -69,3 +69,23 @@ If missing, all genes are drawn in gray without highlighted labels.
 - If `chrom_sizes` is missing, chromosome sizes are inferred from `global_manhattan` and `qtl_regions`.
 - If `r2` is missing, local points are drawn in neutral gray.
 - If `gene_models` is missing, the lower panel is drawn as an empty annotation track with a message.
+
+## Renderers
+
+### Default
+
+- `scripts/plot_gwas_qtl_summary.py`
+
+This renderer is based on the plotting structure extracted and adapted from the BSA plotting workflow.
+
+### Alternate
+
+- `scripts/plot_ld_qtl_summary.R`
+
+This renderer keeps the R-based LD/QTL summary style.
+
+## Table builder
+
+If users do not already have plotting tables, they can build them from GWAS/QTL outputs with:
+
+- `scripts/build_qtl_plot_tables.py`

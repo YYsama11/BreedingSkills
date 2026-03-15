@@ -2,6 +2,7 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+renderer="${QTL_PLOT_RENDERER:-python}"
 
 trait_label="${QTL_PLOT_TRAIT_LABEL:-QTL summary}"
 chrom_sizes="${QTL_PLOT_CHROM_SIZES:-}"
@@ -14,7 +15,11 @@ out_path="${QTL_PLOT_OUT:-qtl_summary_plot.pdf}"
 y_min="${QTL_PLOT_Y_MIN:-3}"
 max_loci="${QTL_PLOT_MAX_LOCI:-0}"
 
-cmd=(Rscript "${script_dir}/plot_ld_qtl_summary.R" --trait-label "${trait_label}" --global-manhattan "${global_manhattan}" --qtl-regions "${qtl_regions}" --local-manhattan "${local_manhattan}" --out "${out_path}" --y-min "${y_min}" --max-loci "${max_loci}")
+if [[ "${renderer}" == "r" ]]; then
+  cmd=(Rscript "${script_dir}/plot_ld_qtl_summary.R" --trait-label "${trait_label}" --global-manhattan "${global_manhattan}" --qtl-regions "${qtl_regions}" --local-manhattan "${local_manhattan}" --out "${out_path}" --y-min "${y_min}" --max-loci "${max_loci}")
+else
+  cmd=(python3 "${script_dir}/plot_gwas_qtl_summary.py" --trait-label "${trait_label}" --global-manhattan "${global_manhattan}" --qtl-regions "${qtl_regions}" --local-manhattan "${local_manhattan}" --out "${out_path}" --y-min "${y_min}" --max-loci "${max_loci}")
+fi
 
 if [[ -n "${chrom_sizes}" ]]; then
   cmd+=(--chrom-sizes "${chrom_sizes}")

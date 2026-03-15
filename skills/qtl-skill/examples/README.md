@@ -1,6 +1,6 @@
 # QTL Plotting Examples
 
-This directory contains two plotting demonstrations for `plot_ld_qtl_summary.R`.
+This directory contains two plotting demonstrations for the QTL plotting layer.
 
 ## Example sets
 
@@ -29,3 +29,12 @@ Contains a richer example with:
 - `gene_models.tsv`
 - `highlight_genes.tsv` (rich example only)
 - rendered plot image(s)
+
+## Renderers used
+
+- `basic/basic_qtl_summary.png`
+- `rich/rich_qtl_summary.png`
+
+Both examples are generated through the default Python plotting workflow exposed by:
+
+- `scripts/run_qtl_plot.sh`
