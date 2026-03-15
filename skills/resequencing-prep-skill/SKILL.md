@@ -5,17 +5,26 @@ description: Prepare GWAS-ready genotype inputs from raw resequencing reads by a
 
 # Resequencing Preparation Skill
 
-Use this skill when the user only has raw resequencing reads and wants to generate inputs required by the GWAS skill.
+Use this skill when the user starts from raw resequencing reads and wants outputs that can be passed into the GWAS skill.
 
-## Scope
+## When to use
 
-This skill starts from:
+- The user has `FASTQ` files, a reference genome, and a sample manifest.
+- The user does not yet have `tped/tfam`, kinship, PCA, or covariates.
+- The user wants to prepare `EMMAX`-ready genotype inputs before running GWAS.
 
-- FASTQ files
+## When not to use
+
+- Do not use this skill if the user already has `tped/tfam`, kinship, and covariates.
+- In that case, use `gwas-skill` directly.
+
+## Inputs
+
+- `FASTQ` files
 - reference genome
 - sample manifest
 
-It produces:
+## Outputs
 
 - genotype panel in `tped/tfam`
 - PLINK `BED/BIM/FAM`
@@ -34,3 +43,9 @@ It produces:
 ```bash
 bash scripts/run_resequencing_prep.sh
 ```
+
+## Downstream handoff
+
+The outputs of this skill are intended to feed directly into:
+
+- `gwas-skill`

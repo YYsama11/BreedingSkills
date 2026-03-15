@@ -7,9 +7,19 @@ description: Interpret GWAS signals at the locus level by collapsing significant
 
 Use this skill after GWAS has already produced significant SNP results.
 
-## Scope
+## When to use
 
-This skill starts from:
+- The user already has GWAS significant SNP results.
+- The user wants lead loci, LD-supported QTL regions, or candidate-gene interpretation.
+- The user may also want layered QTL summary figures.
+
+## When not to use
+
+- Do not use this skill for raw read processing.
+- Do not use this skill for core GWAS model execution.
+- Use `gwas-skill` first if association analysis has not been run yet.
+
+## Inputs
 
 - significant SNP tables
 - genotype files for LD calculation
@@ -20,7 +30,7 @@ Optional inputs:
 - gene functional annotation table
 - trait summary table
 
-It produces:
+## Outputs
 
 - lead loci
 - LD-supported QTL intervals
@@ -35,8 +45,14 @@ It produces:
 - `references/workflow.md`
 - `references/plot_input_contract.md`
 
-## Main entrypoint
+## Main entrypoints
 
 ```bash
 bash scripts/run_qtl_pipeline.sh
+```
+
+For plotting-only usage:
+
+```bash
+bash scripts/run_qtl_plot.sh
 ```

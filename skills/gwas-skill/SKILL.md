@@ -5,18 +5,29 @@ description: Run a core high-throughput EMMAX-based GWAS workflow starting from 
 
 # GWAS Skill
 
-Use this skill for the **core GWAS stage** only.
+Use this skill for the core GWAS stage only.
 
-## Scope
+## When to use
 
-This skill starts from:
+- The user already has `EMMAX`-ready genotype inputs.
+- The user has a phenotype matrix or preformatted trait table.
+- The user wants GWAS association results, Manhattan plots, and QQ plots.
+
+## When not to use
+
+- Do not use this skill if the user only has raw resequencing reads.
+- Use `resequencing-prep-skill` first in that case.
+- Do not use this skill for LD/QTL/candidate-gene interpretation.
+- Use `qtl-skill` after GWAS if downstream locus interpretation is needed.
+
+## Inputs
 
 - phenotype matrix
 - `tped/tfam`
 - kinship matrix
 - covariate file
 
-It produces:
+## Outputs
 
 - Manhattan plots
 - QQ plots
@@ -45,3 +56,9 @@ Those belong in separate skills.
 ```bash
 bash scripts/run_full_pipeline.sh
 ```
+
+## Downstream handoff
+
+The outputs of this skill are intended to feed directly into:
+
+- `qtl-skill`
