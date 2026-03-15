@@ -33,6 +33,50 @@ Each skill targets a specific stage of a breeding-oriented genomics pipeline, so
 
 </details>
 
+## Use with Codex
+
+This repository is designed to be:
+
+- published on GitHub
+- cloned locally
+- installed into a local Codex skill directory
+
+### Recommended usage model
+
+1. Keep GitHub as the publication and update source
+2. Clone the repository locally
+3. Install one or more skills into your local Codex skills directory
+
+### Install all skills
+
+```bash
+git clone https://github.com/YYsama11/BreedingSkills.git
+cd BreedingSkills
+bash scripts/install_to_codex_home.sh
+```
+
+### Install one skill only
+
+```bash
+bash scripts/install_to_codex_home.sh gwas-skill
+```
+
+### Install as symlinks for development
+
+```bash
+bash scripts/install_to_codex_home.sh --symlink
+```
+
+By default, the install target is:
+
+- `${CODEX_HOME:-$HOME/.codex}/skills`
+
+### Skill order
+
+See:
+
+- `skills/INDEX.md`
+
 <details>
 <summary><strong>gwas-skill</strong></summary>
 
