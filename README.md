@@ -4,35 +4,6 @@
 
 Each skill targets a specific stage of a breeding-oriented genomics pipeline, so users can start from the stage that matches their current data.
 
-## Available skills
-
-<details>
-<summary><strong>resequencing-prep-skill</strong></summary>
-
-### What it does
-
-- starts from raw resequencing reads
-- aligns reads to a reference genome
-- calls SNPs
-- prepares GWAS-ready genotype resources
-
-### Input requirements
-
-- sample manifest
-- FASTQ files
-- reference genome
-
-### Output requirements
-
-- `genotype_panel.tped`
-- `genotype_panel.tfam`
-- PLINK files
-- kinship matrix
-- PCA
-- covariates
-
-</details>
-
 ## Local skill deployment
 
 This repository is designed to be:
@@ -64,6 +35,35 @@ bash scripts/install_to_local_skills.sh gwas-skill
 By default, the install target is:
 
 - `${LOCAL_SKILLS_HOME:-$HOME/.local/skills}`
+
+## Available skills
+
+<details>
+<summary><strong>resequencing-prep-skill</strong></summary>
+
+### What it does
+
+- starts from raw resequencing reads
+- aligns reads to a reference genome
+- calls SNPs
+- prepares GWAS-ready genotype resources
+
+### Input requirements
+
+- sample manifest
+- FASTQ files
+- reference genome
+
+### Output requirements
+
+- `genotype_panel.tped`
+- `genotype_panel.tfam`
+- PLINK files
+- kinship matrix
+- PCA
+- covariates
+
+</details>
 
 <details>
 <summary><strong>gwas-skill</strong></summary>
