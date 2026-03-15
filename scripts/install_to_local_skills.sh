@@ -4,18 +4,18 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
 skills_dir="${repo_root}/skills"
-codex_home="${CODEX_HOME:-${HOME}/.codex}"
-target_root="${codex_home}/skills"
+skills_home="${LOCAL_SKILLS_HOME:-${HOME}/.local/skills}"
+target_root="${skills_home}"
 mode="copy"
 
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/install_to_codex_home.sh [--symlink] [skill-name ...]
+  bash scripts/install_to_local_skills.sh [--symlink] [skill-name ...]
 
 Behavior:
   - With no skill-name arguments, installs all skills from this repository
-  - By default, copies each skill into $CODEX_HOME/skills
+  - By default, copies each skill into $LOCAL_SKILLS_HOME
   - With --symlink, creates symbolic links instead of copying
 EOF
 }
