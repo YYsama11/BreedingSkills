@@ -23,7 +23,7 @@ description: Use when GWAS summary statistics are available and you need to coll
 2. Group lead SNPs by trait and chromosome
 3. Build QTL intervals with LD support or fixed windows
 4. Intersect QTL intervals with gene annotation to collect candidate genes
-5. Export QTL summaries and candidate gene tables
+5. Export QTL summaries, candidate gene tables, and plotting-ready QTL context tables
 
 ## Primary outputs
 
@@ -31,8 +31,11 @@ description: Use when GWAS summary statistics are available and you need to coll
 - `workflow_plan.txt`
 - `qtl_regions/`
 - `candidates/`
+- `plots/`
 
 ## Read only when needed
 
 - Input summary-table requirements: `references/input_contract.md`
 - QTL and candidate-gene strategy notes: `references/workflow.md`
+- Plotting table requirements: `references/plot_input_contract.md`
+- Plot colors, panel layout, and highlight style: `references/plot_style.md`

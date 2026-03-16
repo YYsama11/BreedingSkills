@@ -12,6 +12,12 @@
 - Reserve separate columns for representative genes, nearest genes, and functional notes
 - If annotation databases are available, append functional keywords in dedicated columns
 
+## Plotting guidance
+
+- Use `scripts/plot_ld_qtl_summary_reference.R` as the reference renderer for layered LD/QTL summary figures
+- Use `references/plot_input_contract.md` to prepare plotting tables
+- Use `references/plot_style.md` as the style contract for colors, panel layout, and highlight logic
+
 ## Delivery standard
 
 - Every QTL can be traced back to its lead SNP and significance threshold

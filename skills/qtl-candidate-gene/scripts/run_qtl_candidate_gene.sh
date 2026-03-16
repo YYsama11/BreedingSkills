@@ -38,7 +38,7 @@ for var_name in "${required_vars[@]}"; do
   [[ -n "${!var_name:-}" ]] || { echo "Missing variable: $var_name" >&2; exit 1; }
 done
 
-mkdir -p "$OUTDIR/qtl_regions" "$OUTDIR/candidates" "$OUTDIR/logs"
+mkdir -p "$OUTDIR/qtl_regions" "$OUTDIR/candidates" "$OUTDIR/plots" "$OUTDIR/logs"
 
 awk -F'\t' -v p_threshold="$P_THRESHOLD" '
 NR==1 {
@@ -60,6 +60,8 @@ cat > "$OUTDIR/workflow_plan.txt" <<EOF
 3. If ${LD_TABLE:-<not_provided>} exists, replace fixed windows with LD-supported boundaries.
 4. Intersect QTL intervals with ${GENE_ANNOTATION} to create candidate genes.
 5. Export QTL summary and candidate gene tables under ${OUTDIR}/qtl_regions and ${OUTDIR}/candidates.
+6. Prepare plotting tables and render LD/QTL summary figures with skills/qtl-candidate-gene/scripts/plot_ld_qtl_summary_reference.R.
+7. Follow skills/qtl-candidate-gene/references/plot_style.md for the extracted GWAS_codex figure style.
 EOF
 
 printf 'Prepared %s and %s\n' "$OUTDIR/significant_hits.tsv" "$OUTDIR/workflow_plan.txt"
