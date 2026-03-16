@@ -348,6 +348,7 @@ plot_local_panel <- function(locus, local_df, y_min) {
 }
 
 plot_gene_panel <- function(locus, gene_df, highlight_df) {
+  axis_title <- sprintf("Chr%s position (bp)", locus$chrom)
   panel_genes <- gene_df[
     gene_df$chrom == locus$chrom &
       gene_df$start_bp <= locus$panel_end &
@@ -361,13 +362,14 @@ plot_gene_panel <- function(locus, gene_df, highlight_df) {
       c(locus$panel_start, locus$panel_end),
       c(-0.8, 1.2),
       type = "n",
-      xlab = sprintf("Chr%s position (bp)", locus$chrom),
+      xlab = "",
       ylab = "",
       yaxt = "n",
       bty = "n"
     )
     rect(locus$qtl_start, -0.8, locus$qtl_end, 1.2, col = alpha_col(locus$plot_color, 0.12), border = NA)
     text(mean(c(locus$panel_start, locus$panel_end)), 0.2, labels = "No gene models provided in this interval", cex = 0.8, col = "#666666")
+    mtext(axis_title, side = 1, line = 2.6, cex = 0.9)
     return(invisible(NULL))
   }
 
@@ -377,7 +379,7 @@ plot_gene_panel <- function(locus, gene_df, highlight_df) {
     c(locus$panel_start, locus$panel_end),
     c(-0.8, max_lane + 1.2),
     type = "n",
-    xlab = sprintf("Chr%s position (bp)", locus$chrom),
+    xlab = "",
     ylab = "",
     yaxt = "n",
     bty = "n"
@@ -421,6 +423,7 @@ plot_gene_panel <- function(locus, gene_df, highlight_df) {
       text(anchor, y + 0.2, labels = label, cex = 0.55, pos = 3, col = col, adj = adj)
     }
   }
+  mtext(axis_title, side = 1, line = 2.6, cex = 0.9)
 }
 
 save_plot <- function(trait_label, global_df, loci, local_df, chrom_sizes, gene_df, highlight_df, out_path, y_min, genomewide_p) {
@@ -430,7 +433,7 @@ save_plot <- function(trait_label, global_df, loci, local_df, chrom_sizes, gene_
   offsets_obj <- build_offsets(chrom_sizes)
   offsets <- offsets_obj$offsets
   centers <- offsets_obj$centers
-  heights <- c(2.9, rep(c(2.1, 0.8), nrow(loci)))
+  heights <- c(2.9, rep(c(2, 1), nrow(loci)))
 
   open_device <- if (grepl("\\.png$", out_path, ignore.case = TRUE)) {
     function() png(out_path, width = 1800, height = max(900, 420 + nrow(loci) * 520), res = 160)
@@ -449,7 +452,7 @@ save_plot <- function(trait_label, global_df, loci, local_df, chrom_sizes, gene_
     locus <- loci[i, , drop = FALSE]
     par(mar = c(1.2, 4.2, 2.2, 1.2))
     plot_local_panel(locus, local_df = local_df, y_min = y_min)
-    par(mar = c(3.4, 4.2, 0.4, 1.2))
+    par(mar = c(4.8, 4.2, 0.4, 1.2))
     plot_gene_panel(locus, gene_df, highlight_df)
   }
 }
