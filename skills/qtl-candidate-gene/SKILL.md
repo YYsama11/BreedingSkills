@@ -21,8 +21,8 @@ description: Use when GWAS summary statistics are available and you need to coll
 
 1. Filter significant hits using a project-level p-value threshold
 2. Group lead SNPs by trait and chromosome
-3. Build QTL intervals with LD support or fixed windows
-4. Intersect QTL intervals with gene annotation to collect candidate genes
+3. Build LD-supported QTL intervals from genotype data and fall back to fixed windows only when LD is unavailable
+4. Intersect refined QTL intervals with gene annotation to collect candidate genes
 5. Export QTL summaries, candidate gene tables, and plotting-ready QTL context tables
 
 ## Primary outputs

@@ -16,6 +16,9 @@
 ## Optional files
 
 - `ld_table.tsv`
+- genotype prefix for LD calculation:
+  - `GENO_TFILE_PREFIX` pointing to `tped/tfam`
+  - or `GENO_BFILE_PREFIX` pointing to `bed/bim/fam`
 
 ## Recommended outputs
 

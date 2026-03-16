@@ -47,18 +47,49 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 R_BIN="${R_BIN:-Rscript}"
 PLOT_SCRIPT="${PLOT_SCRIPT:-${script_dir}/plot_ld_qtl_summary_reference.R}"
 QTL_BUILDER="${QTL_BUILDER:-${script_dir}/build_qtl_fixed_window_bundle.py}"
+LD_TABLE="${LD_TABLE:-}"
+GENO_TFILE_PREFIX="${GENO_TFILE_PREFIX:-}"
+GENO_BFILE_PREFIX="${GENO_BFILE_PREFIX:-}"
+BED_CACHE_PREFIX="${BED_CACHE_PREFIX:-}"
+PLINK_BIN="${PLINK_BIN:-plink}"
+PLINK_THREADS="${PLINK_THREADS:-1}"
+LD_R2="${LD_R2:-0.2}"
+LOCAL_FLANK_BP="${LOCAL_FLANK_BP:-200000}"
+MIN_QTL_PAD_BP="${MIN_QTL_PAD_BP:-50000}"
 
 mkdir -p "$OUTDIR/qtl_regions" "$OUTDIR/candidates" "$OUTDIR/plots" "$OUTDIR/logs"
 
-"$PYTHON_BIN" "$QTL_BUILDER" \
-  --gwas-table "$GWAS_TABLE" \
-  --gene-annotation "$GENE_ANNOTATION" \
-  --outdir "$OUTDIR/qtl_regions" \
-  --p-threshold "$P_THRESHOLD" \
-  --window-bp "$WINDOW_BP" \
-  --trait-label "$TRAIT_LABEL" \
-  --reference-fai "$REFERENCE_FAI" \
+builder_cmd=(
+  "$PYTHON_BIN" "$QTL_BUILDER"
+  --gwas-table "$GWAS_TABLE"
+  --gene-annotation "$GENE_ANNOTATION"
+  --outdir "$OUTDIR/qtl_regions"
+  --p-threshold "$P_THRESHOLD"
+  --window-bp "$WINDOW_BP"
+  --trait-label "$TRAIT_LABEL"
+  --reference-fai "$REFERENCE_FAI"
   --max-loci "$MAX_LOCI"
+  --ld-r2 "$LD_R2"
+  --local-flank-bp "$LOCAL_FLANK_BP"
+  --min-qtl-pad-bp "$MIN_QTL_PAD_BP"
+  --plink-bin "$PLINK_BIN"
+  --plink-threads "$PLINK_THREADS"
+)
+
+if [[ -n "$LD_TABLE" && -f "$LD_TABLE" ]]; then
+  builder_cmd+=(--ld-table "$LD_TABLE")
+fi
+if [[ -n "$GENO_TFILE_PREFIX" ]]; then
+  builder_cmd+=(--geno-tfile-prefix "$GENO_TFILE_PREFIX")
+fi
+if [[ -n "$GENO_BFILE_PREFIX" ]]; then
+  builder_cmd+=(--geno-bfile-prefix "$GENO_BFILE_PREFIX")
+fi
+if [[ -n "$BED_CACHE_PREFIX" ]]; then
+  builder_cmd+=(--bed-cache-prefix "$BED_CACHE_PREFIX")
+fi
+
+"${builder_cmd[@]}"
 
 cp "$OUTDIR/qtl_regions/${TRAIT_LABEL}.top10_candidate_genes.tsv" "$OUTDIR/candidates/" 2>/dev/null || true
 
@@ -74,11 +105,12 @@ cp "$OUTDIR/qtl_regions/${TRAIT_LABEL}.top10_candidate_genes.tsv" "$OUTDIR/candi
   --max-loci "$MAX_LOCI"
 
 cat > "$OUTDIR/workflow_plan.txt" <<EOF
-1. Build fixed-window QTL loci from ${GWAS_TABLE} using p <= ${P_THRESHOLD}.
-2. Intersect the QTL intervals with ${GENE_ANNOTATION} to rank candidate genes.
-3. Export QTL summary tables to ${OUTDIR}/qtl_regions.
-4. Export candidate gene tables to ${OUTDIR}/candidates.
-5. Render the LD/QTL summary figure to ${OUTDIR}/plots/${TRAIT_LABEL}.ld_qtl_summary.pdf using ${PLOT_SCRIPT}.
+1. Build significant loci from ${GWAS_TABLE} using p <= ${P_THRESHOLD}.
+2. Refine each locus with real LD from ${LD_TABLE:-${GENO_BFILE_PREFIX:-${GENO_TFILE_PREFIX:-<not_provided>}}} when available, otherwise fall back to fixed windows.
+3. Intersect the refined QTL intervals with ${GENE_ANNOTATION} to rank candidate genes.
+4. Export QTL summary tables and plotting tables to ${OUTDIR}/qtl_regions.
+5. Export candidate gene tables to ${OUTDIR}/candidates.
+6. Render the LD/QTL summary figure to ${OUTDIR}/plots/${TRAIT_LABEL}.ld_qtl_summary.pdf using ${PLOT_SCRIPT}.
 EOF
 
 printf 'Prepared %s, %s, and %s\n' "$OUTDIR/qtl_regions/${TRAIT_LABEL}.qtl_summary.tsv" "$OUTDIR/candidates/${TRAIT_LABEL}.top10_candidate_genes.tsv" "$OUTDIR/plots/${TRAIT_LABEL}.ld_qtl_summary.pdf"

@@ -2,8 +2,9 @@
 
 ## Interval definition strategy
 
-- If LD has already been computed, prefer LD-supported boundaries for QTL intervals
-- If LD is not available yet, use a fixed window as the initial interval
+- Prefer LD-supported boundaries derived from the lead SNP and nearby genotype data
+- If a precomputed LD table is available, reuse it instead of recalculating
+- If LD is not available yet, use a fixed window as the fallback interval
 - Nearby peaks on the same trait and chromosome should be merged or resolved to one lead signal
 
 ## Candidate gene guidance

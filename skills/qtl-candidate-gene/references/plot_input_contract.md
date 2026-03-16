@@ -43,7 +43,7 @@ Defines the highlighted QTL intervals and local plotting windows.
 - `r2` (optional)
 - `is_lead` (optional)
 
-Provides local association points for each QTL zoom panel.
+Provides local association points for each QTL zoom panel. In the upgraded LD-aware workflow, `r2` should come from real lead-SNP LD calculations whenever genotype inputs are available.
 
 ### `gene_models`
 
@@ -69,6 +69,7 @@ Controls which genes are highlighted and optionally relabeled.
 - If `chrom_sizes` is missing, chromosome lengths are inferred from `global_manhattan` and `qtl_regions`.
 - If `panel_start` and `panel_end` are missing, they are expanded from `qtl_start` and `qtl_end` using the configured flank distance.
 - If `r2` is missing, local points are drawn with the neutral low-LD color.
+- If genotype prefixes are provided to the builder, `r2` is expected to reflect real PLINK-based LD rather than fixed-window placeholders.
 - If `gene_models` is missing, the lower panel is rendered as an empty track with a message.
 
 ## Reference renderer

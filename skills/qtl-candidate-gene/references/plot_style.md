@@ -34,7 +34,7 @@ This style contract is extracted from the LD/QTL summary figure used in the `GWA
 ## Local Manhattan Style
 
 - The QTL interval is shaded with the same locus color at alpha `0.12`
-- Local points are colored by LD (`r2`) bins:
+- Local points are colored by LD (`r2`) bins computed from the lead SNP whenever genotype data are available:
   - `r2 >= 0.8`: `#b2182b`
   - `0.6 <= r2 < 0.8`: `#ef8a62`
   - `0.4 <= r2 < 0.6`: `#fddbc7`
