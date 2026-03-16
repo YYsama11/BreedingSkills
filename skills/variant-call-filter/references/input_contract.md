@@ -1,23 +1,23 @@
 # Input Contract
 
-## 必需文件
+## Required files
 
 - `bam_list.tsv`
-- 参考基因组 `genome.fa`
+- Reference genome `genome.fa`
 
-## `bam_list.tsv` 列要求
+## `bam_list.tsv` columns
 
-- 表头必须为：`sample_id	bam`
-- `bam` 可以是绝对路径，也可以是相对当前工作目录的路径
-- 所有 BAM 必须已经排序并建立索引
+- The header must be `sample_id	bam`
+- `bam` may be an absolute path or a path relative to the working directory
+- All BAM files must already be sorted and indexed
 
-## 推荐最小元数据
+## Recommended minimal metadata
 
-- 每个样本只出现一次
-- 不混用不同参考版本生成的 BAM
-- 保留样本批次信息，便于后续排查批次效应
+- Each sample appears only once
+- Do not mix BAM files generated against different reference versions
+- Retain batch information for downstream troubleshooting
 
-## 最终 VCF 建议
+## Final VCF recommendations
 
-- 同时保留原始调用结果、标准化结果和过滤结果
-- 所有过滤阈值都应记录在流程配置中
+- Keep raw calls, normalized results, and filtered results together
+- Record all filter thresholds in the workflow configuration

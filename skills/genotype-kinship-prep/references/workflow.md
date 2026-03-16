@@ -1,19 +1,19 @@
 # Workflow Notes
 
-## 默认软件
+## Default software
 
-- 格式转换与 PCA：`plink`
-- kinship：`emmax-kin-intel64`
-- 关联分析引擎：`emmax-intel64`
+- Format conversion and PCA: `plink`
+- Kinship generation: `emmax-kin-intel64`
+- Association engine: `emmax-intel64`
 
-## 关键检查点
+## Key checkpoints
 
-- phenotype 首列样本顺序是否与 `tfam` 对齐
-- PCA 与 kinship 是否基于同一批样本
-- covariate 列是否包含截距或已按项目规范处理
+- Confirm that the sample order in the phenotype file matches `tfam`
+- Confirm that PCA and kinship are calculated from the same set of samples
+- Confirm whether the covariate table already includes an intercept column
 
-## 交付标准
+## Delivery standard
 
-- 生成的 `tped/tfam` 可直接供 `emmax-intel64` 调用
-- kinship 文件与 `tfam` 样本顺序一致
-- 所有 trait 已汇总到一个清晰的 trait 列表中
+- The generated `tped/tfam` files can be used directly by `emmax-intel64`
+- The kinship file follows the same sample order as `tfam`
+- All traits are collected into a clear trait list for batch execution

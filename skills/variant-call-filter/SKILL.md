@@ -1,31 +1,31 @@
 ---
 name: variant-call-filter
-description: Use when you already have aligned BAM files and need cohort-level variant calling, normalization, and filtering to obtain a clean VCF for downstream population genetics or GWAS; 适用于 BAM 已准备好、需要做变异检测与过滤清洗的场景。
+description: Use when you already have aligned BAM files and need cohort-level variant calling, normalization, and filtering to obtain a clean VCF for downstream population genetics or GWAS.
 ---
 
 # variant-call-filter
 
-## 何时使用
+## When to use
 
-- 上游已经完成 read QC 与 reference alignment
-- 目标是得到高质量、可追溯的 cohort VCF
-- 需要同时保留 raw call、normalized VCF 和 filtered VCF
+- Upstream read QC and reference alignment are already finished
+- The goal is a clean, traceable cohort VCF
+- You want to retain raw calls, normalized VCFs, and filtered VCFs
 
-## 快速开始
+## Quick start
 
-- 按 `references/input_contract.md` 准备 `bam_list.tsv`
-- 复制并修改 `assets/variant_call_filter.env.template`
-- 运行 `bash scripts/run_variant_call_filter.sh --config assets/variant_call_filter.env.template`
+- Prepare `bam_list.tsv` as described in `references/input_contract.md`
+- Copy and edit `assets/variant_call_filter.env.template`
+- Run `bash scripts/run_variant_call_filter.sh --config assets/variant_call_filter.env.template`
 
-## 默认工作流
+## Default workflow
 
-1. 校验 BAM 清单和参考基因组
-2. 根据项目策略选择 `bcftools` 或 `GATK` caller
-3. 对原始 VCF 做 left-normalization、拆分多等位位点和基本统计
-4. 依据 `QUAL`、深度、缺失率和等位频率进行过滤
-5. 输出过滤报告、位点统计和最终 cohort VCF
+1. Validate the BAM manifest and reference genome
+2. Choose a caller such as `bcftools` or `GATK` based on project policy
+3. Normalize the raw VCF, split multiallelic sites, and collect basic statistics
+4. Apply quality, depth, missingness, and allele-frequency filters
+5. Export filter reports, site statistics, and the final cohort VCF
 
-## 主要产物
+## Primary outputs
 
 - `bam_manifest.tsv`
 - `bam_paths.list`
@@ -34,7 +34,7 @@ description: Use when you already have aligned BAM files and need cohort-level v
 - `normalized/`
 - `filtered/`
 
-## 需要时再读取
+## Read only when needed
 
-- BAM 清单格式：`references/input_contract.md`
-- caller 与过滤阈值建议：`references/workflow.md`
+- BAM manifest rules: `references/input_contract.md`
+- Caller selection and filter threshold guidance: `references/workflow.md`

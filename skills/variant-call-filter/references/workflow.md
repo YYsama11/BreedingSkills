@@ -1,18 +1,18 @@
 # Workflow Notes
 
-## caller 选择
+## Caller selection
 
-- 样本数中等且追求快速迭代时，可先使用 `bcftools`
-- 如果项目已经标准化到 GATK Best Practices，可切换到 `GATK HaplotypeCaller` + joint genotyping
+- Use `bcftools` first when the cohort size is moderate and fast iteration matters
+- Switch to `GATK HaplotypeCaller` plus joint genotyping when the project already follows GATK Best Practices
 
-## 过滤建议
+## Filtering guidance
 
-- 先做位点标准化，再应用质量阈值
-- 过滤至少包含 `QUAL`、深度、缺失率
-- 群体数据常常还要追加 MAF 或 MAC 限制
+- Normalize sites before applying quality filters
+- Include at least `QUAL`, depth, and missingness in the baseline filters
+- Population datasets often also need MAF or MAC constraints
 
-## 交付标准
+## Delivery standard
 
-- 过滤后的 VCF 可以被 `plink` 或 `bcftools stats` 正常读取
-- 位点数变化在各步骤中可解释
-- 样本顺序与上游 BAM 清单可追溯
+- The filtered VCF can be read cleanly by `plink` or `bcftools stats`
+- Site-count changes remain explainable across each stage
+- Sample order remains traceable back to the original BAM manifest

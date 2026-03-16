@@ -1,31 +1,31 @@
 ---
 name: genotype-kinship-prep
-description: Use when you need to transform filtered genotype data plus phenotype and covariate tables into EMMAX-ready inputs including TPED/TFAM, kinship, PCA covariates, and sample-intersected trait matrices; 适用于为 emmax-intel64 准备 GWAS 输入文件的场景。
+description: Use when you need to transform filtered genotype data plus phenotype and covariate tables into EMMAX-ready inputs including TPED/TFAM, kinship, PCA covariates, and sample-intersected trait matrices.
 ---
 
 # genotype-kinship-prep
 
-## 何时使用
+## When to use
 
-- 已经拥有过滤后的 VCF 或 PLINK 数据
-- 需要整理样本交集、协变量、PCA 与 kinship
-- 下游关联分析软件固定为 `emmax-intel64`
+- You already have a filtered VCF or PLINK dataset
+- You need to reconcile sample intersections, covariates, PCA, and kinship
+- The downstream association engine is fixed to `emmax-intel64`
 
-## 快速开始
+## Quick start
 
-- 按 `references/input_contract.md` 准备基因型和表型矩阵
-- 复制并修改 `assets/genotype_kinship_prep.env.template`
-- 运行 `bash scripts/run_genotype_kinship_prep.sh --config assets/genotype_kinship_prep.env.template`
+- Prepare genotype and phenotype matrices as described in `references/input_contract.md`
+- Copy and edit `assets/genotype_kinship_prep.env.template`
+- Run `bash scripts/run_genotype_kinship_prep.sh --config assets/genotype_kinship_prep.env.template`
 
-## 默认工作流
+## Default workflow
 
-1. 校验 genotype、phenotype 和 sample ID 是否一致
-2. 将 VCF 转换为 EMMAX 需要的 `tped/tfam`
-3. 构建 PLINK 二进制文件并计算 PCA 协变量
-4. 生成 kinship 矩阵
-5. 提取 trait 列表，形成批量运行的 trait manifest
+1. Validate genotype, phenotype, and sample identifiers
+2. Convert the VCF into EMMAX-compatible `tped/tfam`
+3. Build PLINK binaries and compute PCA covariates
+4. Generate the kinship matrix
+5. Extract trait names and write a trait manifest for batch GWAS
 
-## 主要产物
+## Primary outputs
 
 - `trait_list.txt`
 - `workflow_plan.txt`
@@ -33,7 +33,7 @@ description: Use when you need to transform filtered genotype data plus phenotyp
 - `covariates/`
 - `intermediate/`
 
-## 需要时再读取
+## Read only when needed
 
-- 输入矩阵格式：`references/input_contract.md`
-- `emmax-intel64` 准备细节：`references/workflow.md`
+- Input matrix rules: `references/input_contract.md`
+- `emmax-intel64` preparation details: `references/workflow.md`

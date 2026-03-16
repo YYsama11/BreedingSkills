@@ -1,20 +1,20 @@
 # Workflow Notes
 
-## 默认工具
+## Default tools
 
-- 原始质控：`fastqc`
-- 过滤：`fastp`
-- 比对：`bwa mem`
-- 排序与索引：`samtools`
+- Raw-read QC: `fastqc`
+- Trimming: `fastp`
+- Alignment: `bwa mem`
+- Sorting and indexing: `samtools`
 
-## 关键决策
+## Key decisions
 
-- 如果是短读长群体重测序，优先使用 `bwa mem`
-- 如果有固定接头序列或 lane 差异，先在样本表外部统一命名
-- 如果后续要做 joint calling，尽量在本阶段统一 read group 命名规则
+- Prefer `bwa mem` for short-read population resequencing unless the project specifies another aligner
+- If adapter sets or lane naming differ, normalize names before execution
+- If joint calling is planned later, keep read group naming consistent at this stage
 
-## 交付标准
+## Delivery standard
 
-- 每个样本至少有一个排序且已索引的 BAM
-- 每个样本有 `flagstat` 或同等级统计文件
-- 过滤前后均保留 QC 结果，便于回溯
+- Every sample produces at least one sorted and indexed BAM
+- Every sample has a `flagstat` file or an equivalent mapping summary
+- Both pre-trimming and post-trimming QC outputs are retained for traceability

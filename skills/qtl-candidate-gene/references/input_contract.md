@@ -1,24 +1,24 @@
 # Input Contract
 
-## 必需文件
+## Required files
 
 - `gwas_summary.tsv`
 - `gene_annotation.tsv`
 
-## `gwas_summary.tsv` 列要求
+## `gwas_summary.tsv` columns
 
-- 表头至少包含：`trait	chrom	pos	snp_id	pvalue`
+- The header must include at least `trait	chrom	pos	snp_id	pvalue`
 
-## `gene_annotation.tsv` 列要求
+## `gene_annotation.tsv` columns
 
-- 表头至少包含：`chrom	start	end	gene_id`
+- The header must include at least `chrom	start	end	gene_id`
 
-## 可选文件
+## Optional files
 
 - `ld_table.tsv`
 
-## 输出建议
+## Recommended outputs
 
-- QTL 区间表
-- lead SNP 表
-- candidate gene 表
+- QTL interval table
+- Lead SNP table
+- Candidate gene table

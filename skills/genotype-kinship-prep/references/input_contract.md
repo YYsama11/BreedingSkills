@@ -1,25 +1,25 @@
 # Input Contract
 
-## 必需文件
+## Required files
 
-- 群体 VCF 或已过滤的 PLINK 数据
+- A cohort VCF or an already filtered PLINK dataset
 - `phenotype.tsv`
 
-## `phenotype.tsv` 列要求
+## `phenotype.tsv` columns
 
-- 第 1 列必须为 `sample_id`
-- 第 2 列开始为一个或多个性状
-- 缺失值建议统一为 `NA`
+- The first column must be `sample_id`
+- Columns from the second onward represent one or more traits
+- Use `NA` as the preferred missing-value marker
 
-## 样本一致性要求
+## Sample consistency requirements
 
-- genotype 与 phenotype 使用同一套样本命名
-- 去除重复样本后再计算 PCA 和 kinship
-- 如有群体结构协变量，建议单独提供一个 covariate 表
+- Genotype and phenotype files must use the same sample naming scheme
+- Remove duplicate samples before calculating PCA and kinship
+- If population-structure covariates already exist, provide them as a separate covariate table
 
-## EMMAX 输出要求
+## EMMAX output requirements
 
 - `PREFIX.tped`
 - `PREFIX.tfam`
-- kinship 矩阵
-- 每个性状可单独抽取的 phenotype 向量
+- A kinship matrix
+- Per-trait phenotype vectors that can be extracted independently

@@ -1,24 +1,24 @@
 # Input Contract
 
-## 必需文件
+## Required files
 
 - `sample_sheet.tsv`
-- 参考基因组 `genome.fa`
-- 原始双端 FASTQ 文件目录
+- Reference genome `genome.fa`
+- A directory containing paired-end raw FASTQ files
 
-## `sample_sheet.tsv` 列要求
+## `sample_sheet.tsv` columns
 
-- 表头必须为：`sample_id	read1	read2`
-- `read1` 和 `read2` 填写相对 `FASTQ_DIR` 的文件名或绝对路径
-- `sample_id` 不能重复
+- The header must be `sample_id	read1	read2`
+- `read1` and `read2` may be file names relative to `FASTQ_DIR` or absolute paths
+- `sample_id` values must be unique
 
-## 最低检查项
+## Minimum validation checks
 
-- 样本名在所有中间文件中保持一致
-- FASTQ 文件对数与样本表行数一致
-- 参考基因组已经准备好 `bwa` 与 `samtools faidx` 索引
+- Sample names stay consistent across all intermediate files
+- The number of FASTQ pairs matches the number of sample sheet rows
+- The reference genome already has `bwa` and `samtools faidx` indexes
 
-## 推荐输出组织
+## Recommended output layout
 
 - `outputs/read_qc_alignment/qc_raw`
 - `outputs/read_qc_alignment/qc_trimmed`

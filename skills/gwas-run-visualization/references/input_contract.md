@@ -1,23 +1,23 @@
 # Input Contract
 
-## 必需文件
+## Required files
 
 - `PREFIX.tped`
 - `PREFIX.tfam`
-- kinship 矩阵
+- A kinship matrix
 - `phenotype.tsv`
 
-## 可选文件
+## Optional files
 
 - `covariates.tsv`
 
-## `phenotype.tsv` 列要求
+## `phenotype.tsv` columns
 
-- 第 1 列必须为 `sample_id`
-- 第 2 列开始为各性状名
-- 性状名建议只使用字母、数字、下划线
+- The first column must be `sample_id`
+- Columns from the second onward are trait names
+- Trait names should use letters, numbers, and underscores when possible
 
-## 结果表建议列
+## Recommended result columns
 
 - `trait`
 - `chrom`

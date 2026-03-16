@@ -1,39 +1,39 @@
 ---
 name: read-qc-alignment
-description: Use when starting from raw FASTQ reads and you need resequencing QC, trimming, reference alignment, sorted BAM generation, and mapping QC for breeding projects; 适用于从原始 FASTQ 开始完成质控、过滤、比对和 BAM 质控。
+description: Use when starting from raw FASTQ reads and you need resequencing QC, trimming, reference alignment, sorted BAM generation, and mapping QC for breeding projects.
 ---
 
 # read-qc-alignment
 
-## 何时使用
+## When to use
 
-- 输入仍然是原始测序数据，通常为双端 `FASTQ.gz`
-- 目标是生成后续变异检测可用的高质量 BAM
-- 需要在流程里同时保留原始质控和过滤后质控结果
+- The input is still raw sequencing data, usually paired-end `FASTQ.gz`
+- The goal is to produce high-quality BAM files for downstream variant calling
+- You want to preserve both pre-trimming and post-trimming QC outputs
 
-## 快速开始
+## Quick start
 
-- 按 `references/input_contract.md` 准备样本表与参考基因组
-- 复制并修改 `assets/read_qc_alignment.env.template`
-- 运行 `bash scripts/run_read_qc_alignment.sh --config assets/read_qc_alignment.env.template`
+- Prepare the sample sheet and reference genome described in `references/input_contract.md`
+- Copy and edit `assets/read_qc_alignment.env.template`
+- Run `bash scripts/run_read_qc_alignment.sh --config assets/read_qc_alignment.env.template`
 
-## 默认工作流
+## Default workflow
 
-1. 校验样本表、FASTQ 路径和参考基因组索引
-2. 运行原始读段质控并汇总 FastQC 指标
-3. 使用 `fastp` 或等价工具进行接头和低质量碱基过滤
-4. 使用 `bwa mem` 或兼容短读长比对器完成参考基因组比对
-5. 对 BAM 进行排序、索引和基础 mapping QC
-6. 输出可供下游 variant calling 使用的 BAM 清单
+1. Validate the sample sheet, FASTQ paths, and reference genome indexes
+2. Run raw-read QC and collect FastQC-style metrics
+3. Trim adapters and low-quality bases with `fastp` or an equivalent tool
+4. Align cleaned reads with `bwa mem` or another short-read aligner
+5. Sort, index, and summarize BAM alignment metrics
+6. Export a BAM manifest ready for downstream variant calling
 
-## 主要产物
+## Primary outputs
 
 - `sample_manifest.tsv`
 - `workflow_plan.txt`
-- `qc_raw/` 与 `qc_trimmed/`
-- `bam/` 与 `stats/`
+- `qc_raw/` and `qc_trimmed/`
+- `bam/` and `stats/`
 
-## 需要时再读取
+## Read only when needed
 
-- 输入列和目录约束：`references/input_contract.md`
-- 工具选择与关键检查点：`references/workflow.md`
+- Input columns and directory requirements: `references/input_contract.md`
+- Tool choices and key checkpoints: `references/workflow.md`

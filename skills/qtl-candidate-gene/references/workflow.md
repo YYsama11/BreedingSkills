@@ -1,19 +1,19 @@
 # Workflow Notes
 
-## 区间定义策略
+## Interval definition strategy
 
-- 若已计算 LD，优先用 LD 支持边界定义 QTL
-- 若暂时没有 LD，可先用固定窗口作为初始候选区间
-- 同一 trait 同一染色体上相近显著峰需要做合并或主峰选择
+- If LD has already been computed, prefer LD-supported boundaries for QTL intervals
+- If LD is not available yet, use a fixed window as the initial interval
+- Nearby peaks on the same trait and chromosome should be merged or resolved to one lead signal
 
-## 候选基因整理建议
+## Candidate gene guidance
 
-- 保留区间内全部基因
-- 对代表基因、最近基因和功能注释分别留列
-- 如果有注释数据库，可把功能关键词单独追加到表中
+- Keep all genes inside each QTL interval
+- Reserve separate columns for representative genes, nearest genes, and functional notes
+- If annotation databases are available, append functional keywords in dedicated columns
 
-## 交付标准
+## Delivery standard
 
-- 每个 QTL 都能回溯到 lead SNP 与阈值来源
-- candidate gene 表记录所用窗口或 LD 规则
-- 所有输出可以直接供后续绘图或报告汇总使用
+- Every QTL can be traced back to its lead SNP and significance threshold
+- The candidate gene table records the applied window or LD rule
+- All outputs are ready for downstream plotting or report assembly
