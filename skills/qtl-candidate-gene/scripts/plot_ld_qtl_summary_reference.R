@@ -69,6 +69,26 @@ alpha_col <- function(col, alpha = 1) {
   grDevices::adjustcolor(col, alpha.f = alpha)
 }
 
+sample_background_points <- function(df, keep_mask, max_background_points = 200000L, order_cols = NULL) {
+  keep_mask <- as.logical(keep_mask)
+  keep_mask[is.na(keep_mask)] <- FALSE
+
+  keep_df <- df[keep_mask, , drop = FALSE]
+  background_df <- df[!keep_mask, , drop = FALSE]
+
+  if (nrow(background_df) > max_background_points) {
+    set.seed(123)
+    background_df <- background_df[sample.int(nrow(background_df), max_background_points), , drop = FALSE]
+  }
+
+  out <- rbind(keep_df, background_df)
+  if (!is.null(order_cols) && nrow(out) > 0) {
+    ordering <- do.call(order, unname(out[, order_cols, drop = FALSE]))
+    out <- out[ordering, , drop = FALSE]
+  }
+  out
+}
+
 r2_bin <- function(r2) {
   if (is.na(r2)) return("#d1d1d1")
   if (r2 >= 0.8) return("#b2182b")
@@ -126,12 +146,18 @@ normalize_inputs <- function(opts) {
     ensure_cols(global_df, c("p_value"), "global_manhattan")
     global_df$mlog10_p <- -log10(pmax(as.numeric(global_df$p_value), .Machine$double.xmin))
   }
+  if (!("p_value" %in% colnames(global_df))) {
+    global_df$p_value <- 10^(-as.numeric(global_df$mlog10_p))
+  }
   if (!("lead_p" %in% colnames(qtl_df))) {
     qtl_df$lead_p <- 10^(-as.numeric(qtl_df$lead_mlog10_p))
   }
   if (!("mlog10_p" %in% colnames(local_df))) {
     ensure_cols(local_df, c("p_value"), "local_manhattan")
     local_df$mlog10_p <- -log10(pmax(as.numeric(local_df$p_value), .Machine$double.xmin))
+  }
+  if (!("p_value" %in% colnames(local_df))) {
+    local_df$p_value <- 10^(-as.numeric(local_df$mlog10_p))
   }
   if (!("r2" %in% colnames(local_df))) local_df$r2 <- NA_real_
   if (!("is_lead" %in% colnames(local_df))) {
@@ -210,6 +236,22 @@ layout_lanes <- function(genes, pad = 15000L) {
 plot_global_panel <- function(trait_label, global_df, loci, offsets, centers, chrom_sizes, y_min, genomewide_p) {
   global_df$x <- global_df$bp + offsets[as.character(global_df$chrom)]
   global_df$c <- ifelse(global_df$chrom %% 2L == 1L, "#4C78A8", "#F58518")
+  keep_mask <- global_df$p_value <= 1e-4
+  if (nrow(loci) > 0) {
+    for (i in seq_len(nrow(loci))) {
+      locus <- loci[i, , drop = FALSE]
+      keep_mask <- keep_mask |
+        (global_df$chrom == locus$chrom &
+           global_df$bp >= locus$qtl_start &
+           global_df$bp <= locus$qtl_end)
+    }
+  }
+  plot_df <- sample_background_points(
+    global_df,
+    keep_mask = keep_mask,
+    max_background_points = 200000L,
+    order_cols = c("chrom", "bp")
+  )
   ymax <- max(global_df$mlog10_p, na.rm = TRUE)
   if (nrow(loci) > 0) {
     ymax <- max(ymax, -log10(pmax(min(loci$lead_p, na.rm = TRUE), .Machine$double.xmin)))
@@ -230,7 +272,7 @@ plot_global_panel <- function(trait_label, global_df, loci, offsets, centers, ch
       border = NA
     )
   }
-  points(global_df$x, global_df$mlog10_p, pch = 16, cex = 0.35, col = alpha_col(global_df$c, 0.75))
+  points(plot_df$x, plot_df$mlog10_p, pch = 16, cex = 0.35, col = alpha_col(plot_df$c, 0.75))
   abline(h = -log10(genomewide_p), col = "#b2182b", lty = 2, lwd = 0.8)
   for (i in seq_len(nrow(loci))) {
     locus <- loci[i, , drop = FALSE]
@@ -270,12 +312,18 @@ plot_local_panel <- function(locus, local_df, y_min) {
   }
 
   local$c <- vapply(local$r2, r2_bin, character(1))
+  local_plot <- sample_background_points(
+    local,
+    keep_mask = local$is_lead | local$r2 >= 0.2 | local$p_value <= 1e-4,
+    max_background_points = 20000L,
+    order_cols = c("bp", "mlog10_p")
+  )
   ymax <- max(local$mlog10_p, -log10(pmax(locus$lead_p, .Machine$double.xmin)), na.rm = TRUE)
   ylim <- c(y_min, max(y_min + 0.1, ymax * 1.08))
 
   plot(c(locus$panel_start, locus$panel_end), ylim, type = "n", xlab = "", xaxt = "n", ylab = "-log10(P)", main = "")
   rect(locus$qtl_start, ylim[1], locus$qtl_end, ylim[2], col = alpha_col(locus$plot_color, 0.12), border = NA)
-  points(local$bp, local$mlog10_p, pch = 16, cex = 0.75, col = alpha_col(local$c, 0.9))
+  points(local_plot$bp, local_plot$mlog10_p, pch = 16, cex = 0.75, col = alpha_col(local_plot$c, 0.9))
   points(
     locus$lead_bp,
     -log10(pmax(locus$lead_p, .Machine$double.xmin)),

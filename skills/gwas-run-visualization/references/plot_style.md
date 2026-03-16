@@ -16,6 +16,7 @@ This reference captures the visual style extracted from the original `Manhattan_
 - Chromosome labels shown as `Chr1`, `Chr2`, and so on
 - The x-axis is built from cumulative chromosome offsets
 - The legend is hidden
+- Background points are rendered with sampled-background thinning, while stronger signal points are retained
 - Two dashed threshold lines are shown:
   - suggestive line at `-log10(1 / n_snps)`
   - Bonferroni line at `-log10(0.05 / n_snps)` in red
@@ -40,6 +41,7 @@ If the chromosome count exceeds nine, the palette is repeated in order.
 
 - Point color: `steelblue`
 - Point size: `1.2`
+- The strongest tail is retained while background points are sampled for speed
 - A red dashed `y = x` reference line
 - White background with grid removed
 - Square standalone panel in the default export set

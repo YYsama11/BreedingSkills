@@ -99,6 +99,26 @@ write_tsv <- function(data, path) {
   write.table(data, path, sep = "\t", quote = FALSE, row.names = FALSE)
 }
 
+sample_background_points <- function(data, keep_mask, max_background_points = 200000L, order_cols = NULL) {
+  keep_mask <- as.logical(keep_mask)
+  keep_mask[is.na(keep_mask)] <- FALSE
+
+  keep_df <- data[keep_mask, , drop = FALSE]
+  background_df <- data[!keep_mask, , drop = FALSE]
+
+  if (nrow(background_df) > max_background_points) {
+    set.seed(123)
+    background_df <- background_df[sample.int(nrow(background_df), max_background_points), , drop = FALSE]
+  }
+
+  out <- rbind(keep_df, background_df)
+  if (!is.null(order_cols) && nrow(out) > 0) {
+    ordering <- do.call(order, unname(out[, order_cols, drop = FALSE]))
+    out <- out[ordering, , drop = FALSE]
+  }
+  out
+}
+
 build_manhattan_plot <- function(data, chr_info, suggestive_line, bonferroni_line, prefix) {
   palette <- c(
     "#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
@@ -235,17 +255,17 @@ main <- function() {
   cat("[INFO] Significant Manhattan input:", args$sig_file, "\n")
   cat("[INFO] QQ input:", args$qq_file, "\n")
 
-  manhattan <- read.delim(args$sig_file, header = TRUE, sep = "\t", check.names = FALSE)
+  manhattan_sig <- read.delim(args$sig_file, header = TRUE, sep = "\t", check.names = FALSE)
   qq_data <- read.delim(args$qq_file, header = TRUE, sep = "\t", check.names = FALSE)
 
-  require_columns(manhattan, c("SNP", "CHR", "BP", "P"), "Significant Manhattan input")
+  require_columns(manhattan_sig, c("SNP", "CHR", "BP", "P"), "Significant Manhattan input")
   require_columns(qq_data, c("P"), "QQ input")
 
   qq_data <- add_optional_columns(qq_data, c("SNP", "CHR", "BP"))
 
-  manhattan$CHR <- as.numeric(manhattan$CHR)
-  manhattan$BP <- as.numeric(manhattan$BP)
-  manhattan$P <- as.numeric(manhattan$P)
+  manhattan_sig$CHR <- as.numeric(manhattan_sig$CHR)
+  manhattan_sig$BP <- as.numeric(manhattan_sig$BP)
+  manhattan_sig$P <- as.numeric(manhattan_sig$P)
   qq_data$P <- as.numeric(qq_data$P)
   qq_data$CHR <- suppressWarnings(as.numeric(qq_data$CHR))
   qq_data$BP <- suppressWarnings(as.numeric(qq_data$BP))
@@ -258,30 +278,41 @@ main <- function() {
   min_nonzero_p <- min(valid_nonzero_p)
   cat("[INFO] Minimum non-zero p-value:", min_nonzero_p, "\n")
 
-  manhattan$P[manhattan$P == 0] <- min_nonzero_p
+  manhattan_sig$P[manhattan_sig$P == 0] <- min_nonzero_p
   qq_data$P[qq_data$P == 0] <- min_nonzero_p
 
-  manhattan <- manhattan[!is.na(manhattan$CHR) & !is.na(manhattan$BP) & !is.na(manhattan$P), ]
+  manhattan_sig <- manhattan_sig[!is.na(manhattan_sig$CHR) & !is.na(manhattan_sig$BP) & !is.na(manhattan_sig$P), ]
   qq_data <- qq_data[!is.na(qq_data$P), ]
 
-  chr_info <- aggregate(BP ~ CHR, manhattan, max)
+  if (all(c("SNP", "CHR", "BP") %in% colnames(qq_data)) && any(!is.na(qq_data$CHR)) && any(!is.na(qq_data$BP))) {
+    manhattan_all <- qq_data[!is.na(qq_data$CHR) & !is.na(qq_data$BP), c("SNP", "CHR", "BP", "P"), drop = FALSE]
+  } else {
+    manhattan_all <- manhattan_sig
+  }
+
+  chr_info <- aggregate(BP ~ CHR, manhattan_all, max)
   chr_info <- chr_info[order(chr_info$CHR), , drop = FALSE]
   chr_info$offset <- c(0, cumsum(chr_info$BP)[-nrow(chr_info)])
   chr_info$marker <- chr_info$offset + chr_info$BP / 2
 
-  manhattan <- manhattan[order(manhattan$CHR, manhattan$BP), , drop = FALSE]
-  manhattan$offset <- chr_info$offset[match(manhattan$CHR, chr_info$CHR)]
-  manhattan$x <- manhattan$BP + manhattan$offset
-  manhattan$log10p <- -log10(manhattan$P)
+  manhattan_all <- manhattan_all[order(manhattan_all$CHR, manhattan_all$BP), , drop = FALSE]
+  manhattan_all$offset <- chr_info$offset[match(manhattan_all$CHR, chr_info$CHR)]
+  manhattan_all$x <- manhattan_all$BP + manhattan_all$offset
+  manhattan_all$log10p <- -log10(manhattan_all$P)
 
   suggestive_line <- -log10(1 / nrow(qq_data))
   bonferroni_line <- -log10(0.05 / nrow(qq_data))
   cat("[INFO] Suggestive line:", suggestive_line, "\n")
   cat("[INFO] Bonferroni line:", bonferroni_line, "\n")
 
-  manhattan_all <- manhattan
-  manhattan_suggestive <- subset(manhattan, log10p >= suggestive_line & log10p < bonferroni_line)
-  manhattan_significant <- subset(manhattan, log10p >= bonferroni_line)
+  manhattan_suggestive <- subset(manhattan_all, log10p >= suggestive_line & log10p < bonferroni_line)
+  manhattan_significant <- subset(manhattan_all, log10p >= bonferroni_line)
+  manhattan_plot_data <- sample_background_points(
+    data = manhattan_all,
+    keep_mask = (manhattan_all$P <= 1e-4) | (manhattan_all$SNP %in% manhattan_sig$SNP),
+    max_background_points = 200000L,
+    order_cols = c("CHR", "BP")
+  )
 
   write_tsv(
     manhattan_all[, c("SNP", "CHR", "BP", "P", "log10p")],
@@ -306,7 +337,7 @@ main <- function() {
   )
 
   manhattan_plot <- build_manhattan_plot(
-    data = manhattan_all,
+    data = manhattan_plot_data,
     chr_info = chr_info,
     suggestive_line = suggestive_line,
     bonferroni_line = bonferroni_line,

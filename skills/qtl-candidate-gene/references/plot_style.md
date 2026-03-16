@@ -18,6 +18,7 @@ This style contract is extracted from the LD/QTL summary figure used in the `GWA
   - even chromosomes: `#F58518`
 - Point size is visually compact (`cex ≈ 0.35`)
 - Point transparency is about `0.75`
+- Background points are sampled for plotting speed, while QTL intervals and stronger points are retained
 - Each QTL interval is highlighted with a translucent rectangle at alpha `0.12`
 - QTL colors cycle in this order:
   - `#D73027`
@@ -42,6 +43,7 @@ This style contract is extracted from the LD/QTL summary figure used in the `GWA
   - `r2 < 0.2` or missing: `#d1d1d1`
 - Local point size is medium (`cex ≈ 0.75`)
 - Point transparency is about `0.9`
+- Background points are sampled for plotting speed, while the lead SNP, higher-LD points, and stronger local signals are retained
 - The lead SNP is emphasized as a black diamond with a white border
 - Panel titles are left-aligned and include:
   - locus ID
