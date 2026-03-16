@@ -12,6 +12,8 @@
 - QQ plot
 - Lead SNP table
 - Per-trait significant-hit summary
+- Use `scripts/plot_manhattan_qq_reference.R` as the reference implementation
+- Use `references/plot_style.md` as the style contract for colors, thresholds, and layout
 
 ## Delivery standard
 

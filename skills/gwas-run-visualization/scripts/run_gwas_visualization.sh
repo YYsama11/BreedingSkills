@@ -86,6 +86,12 @@ Expected visualization outputs:
 plots/<trait>.manhattan.png
 plots/<trait>.qq.png
 assoc/<trait>.lead_snps.tsv
+
+Reference plotting implementation:
+skills/gwas-run-visualization/scripts/plot_manhattan_qq_reference.R
+
+Reference style notes:
+skills/gwas-run-visualization/references/plot_style.md
 EOF
 
 printf 'Prepared %s and %s\n' "$OUTDIR/trait_list.txt" "$command_file"

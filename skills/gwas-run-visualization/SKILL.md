@@ -37,3 +37,4 @@ description: Use when EMMAX-ready genotype, kinship, phenotype, and optional cov
 
 - Input file and column requirements: `references/input_contract.md`
 - Result directory organization guidance: `references/workflow.md`
+- Plot colors, panel layout, and threshold style: `references/plot_style.md`
