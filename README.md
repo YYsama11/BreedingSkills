@@ -23,3 +23,49 @@ The current version provides five core skills, and each skill follows the same l
 
 - Skill index: `skills/INDEX.md`
 - Per-skill instructions: each skill folder contains its own `SKILL.md`
+
+## Agent Installation
+
+BreedingSkills is a local skill repository, not a web service. To make an agent use these skills, install them into the agent's local skills directory.
+
+### Codex CLI
+
+```bash
+git clone https://github.com/YYsama11/BreedingSkills.git
+cd BreedingSkills
+bash install-codex.sh
+```
+
+### Claude Code
+
+```bash
+bash install-claude.sh
+```
+
+### Gemini CLI
+
+```bash
+bash install-gemini.sh
+```
+
+### OpenClaw
+
+```bash
+bash install-openclaw.sh
+```
+
+## Installer Features
+
+- `--list`: list all installable skills
+- `--validate`: validate skill structure before installation
+- `--skills read-qc-alignment,gwas-run-visualization`: install only selected skills
+- `--project`: install into the current project workspace instead of the global directory
+- `--update`: refresh only skills whose source changed
+- `--uninstall`: remove previously installed BreedingSkills
+- `--dry-run`: preview what would be installed
+
+Example:
+
+```bash
+bash install-codex.sh --skills gwas-run-visualization,qtl-candidate-gene --project
+```
