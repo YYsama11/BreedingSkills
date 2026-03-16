@@ -5,6 +5,7 @@
 - Format conversion and PCA: `plink`
 - Kinship generation: `emmax-kin-intel64`
 - Association engine: `emmax-intel64`
+- Agents should resolve `emmax-intel64` directly before attempting any fallback binary names
 
 ## Key checkpoints
 

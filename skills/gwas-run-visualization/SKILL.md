@@ -15,6 +15,7 @@ description: Use when EMMAX-ready genotype, kinship, phenotype, and optional cov
 
 - Prepare EMMAX inputs and phenotype matrices described in `references/input_contract.md`
 - Copy and edit `assets/gwas_run_visualization.env.template`
+- Use `emmax-intel64` as the default association binary; do not probe plain `emmax` first unless your environment explicitly uses that name
 - Run `bash scripts/run_gwas_visualization.sh --config assets/gwas_run_visualization.env.template`
 
 ## Default workflow

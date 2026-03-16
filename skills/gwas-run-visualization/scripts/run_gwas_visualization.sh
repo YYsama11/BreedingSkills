@@ -3,6 +3,26 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+resolve_bin() {
+  local current_value="$1"
+  shift
+
+  if [[ -n "$current_value" ]] && command -v "$current_value" >/dev/null 2>&1; then
+    printf '%s\n' "$current_value"
+    return 0
+  fi
+
+  local candidate
+  for candidate in "$@"; do
+    if [[ -n "$candidate" ]] && command -v "$candidate" >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 usage() {
   cat <<'EOF'
 Usage: bash scripts/run_gwas_visualization.sh --config path/to/gwas_run_visualization.env
@@ -35,10 +55,16 @@ set -a
 source "$config"
 set +a
 
-required_vars=(TPED_PREFIX KINSHIP_FILE PHENO_TSV OUTDIR EMMAX_BIN)
+required_vars=(TPED_PREFIX KINSHIP_FILE PHENO_TSV OUTDIR)
 for var_name in "${required_vars[@]}"; do
   [[ -n "${!var_name:-}" ]] || { echo "Missing variable: $var_name" >&2; exit 1; }
 done
+
+EMMAX_BIN="${EMMAX_BIN:-}"
+if ! EMMAX_BIN="$(resolve_bin "$EMMAX_BIN" emmax-intel64 emmax)"; then
+  echo "Unable to locate the EMMAX association binary. Set EMMAX_BIN or add emmax-intel64 to PATH." >&2
+  exit 1
+fi
 
 TFAM_FILE="${TFAM_FILE:-${TPED_PREFIX}.tfam}"
 RUN_EMMAX="${RUN_EMMAX:-false}"
@@ -132,6 +158,9 @@ skills/gwas-run-visualization/scripts/plot_manhattan_qq_reference.R
 
 Reference style notes:
 skills/gwas-run-visualization/references/plot_style.md
+
+Resolved EMMAX binary:
+${EMMAX_BIN}
 EOF
 
 if [[ "$RUN_EMMAX" == "true" ]]; then

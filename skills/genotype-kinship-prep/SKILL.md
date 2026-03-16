@@ -15,6 +15,7 @@ description: Use when you need to transform filtered genotype data plus phenotyp
 
 - Prepare genotype and phenotype matrices as described in `references/input_contract.md`
 - Copy and edit `assets/genotype_kinship_prep.env.template`
+- Use `emmax-intel64` and `emmax-kin-intel64` as the default binary names; do not assume a plain `emmax` executable exists in `PATH`
 - Run `bash scripts/run_genotype_kinship_prep.sh --config assets/genotype_kinship_prep.env.template`
 
 ## Default workflow
