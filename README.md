@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="BreedingSkills_logo_hd.png" alt="BreedingSkills logo" width="360">
+</p>
+
 # BreedingSkills
 
 [English](README.md) | [简体中文](README.zh-CN.md)
