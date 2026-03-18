@@ -16,6 +16,8 @@
 - The first column must be `sample_id`
 - Columns from the second onward are trait names
 - Trait names should use letters, numbers, and underscores when possible
+- The phenotype file should already represent the final genotype-level scale chosen for GWAS, such as raw genotype means, BLUEs, BLUPs, or INT-transformed values
+- If that status is not explicit, confirm it with the user before running GWAS
 
 ## Recommended result columns
 
