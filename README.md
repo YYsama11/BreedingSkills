@@ -17,11 +17,11 @@ The current version provides five core skills, and each skill follows the same l
 
 ## Skills
 
-- `skills/read-qc-alignment`: raw FASTQ quality control, trimming, and read alignment
-- `skills/variant-call-filter`: variant calling, normalization, and filtering
-- `skills/genotype-kinship-prep`: EMMAX input preparation, covariates, and kinship
-- `skills/gwas-run-visualization`: EMMAX GWAS execution and result organization
-- `skills/qtl-candidate-gene`: QTL interpretation and candidate gene collection
+- `skills/resequencing-skill`: raw FASTQ quality control, trimming, and read alignment
+- `skills/variant-calling-skill`: variant calling, normalization, and filtering
+- `skills/emmax-prep-skill`: EMMAX input preparation, covariates, and kinship
+- `skills/gwas-skill`: EMMAX GWAS execution and result organization
+- `skills/qtl-skill`: QTL interpretation and candidate gene collection
 
 ## Entry Points
 
@@ -62,7 +62,7 @@ bash install-openclaw.sh
 
 - `--list`: list all installable skills
 - `--validate`: validate skill structure before installation
-- `--skills read-qc-alignment,gwas-run-visualization`: install only selected skills
+- `--skills resequencing-skill,gwas-skill`: install only selected skills
 - `--project`: install into the current project workspace instead of the global directory
 - `--update`: refresh only skills whose source changed
 - `--uninstall`: remove previously installed BreedingSkills
@@ -71,5 +71,5 @@ bash install-openclaw.sh
 Example:
 
 ```bash
-bash install-codex.sh --skills gwas-run-visualization,qtl-candidate-gene --project
+bash install-codex.sh --skills gwas-skill,qtl-skill --project
 ```
