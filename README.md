@@ -2,6 +2,18 @@
   <img src="BreedingSkills_logo_hd.png" alt="BreedingSkills logo" width="280">
 </p>
 
+  <p align="center">
+    <img src="BreedingSkills_logo_hd.png" alt="BreedingSkills logo" width="280">
+  </p>
+
+  <p align="center">
+    <img src="houji_logo.png" alt="Hou Ji Laboratory" height="90">
+    &emsp;&emsp;&emsp;
+    <img src="shanxiagri_logo.png" alt="Shanxi Agricultural University" height="90">
+  </p>
+
+  # BreedingSkills
+
 # BreedingSkills
 
 [English](README.md) | [简体中文](README.zh-CN.md)
