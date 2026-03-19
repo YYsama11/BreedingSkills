@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="BreedingSkills_logo_hd.png" alt="BreedingSkills logo" width="280">
-</p>
-
   <p align="center">
     <img src="BreedingSkills_logo_hd.png" alt="BreedingSkills logo" width="280">
   </p>
