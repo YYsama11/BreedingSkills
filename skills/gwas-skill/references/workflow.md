@@ -1,11 +1,5 @@
 # Workflow Notes
 
-## Phenotype decision gate
-
-- Before running EMMAX, confirm with the user whether the phenotype scale is raw, INT, BLUE, or BLUP
-- If the phenotype still contains replicate or multi-environment structure, recommend mixed-model adjustment before GWAS
-- Use `references/phenotype_decision.md` when the choice is unclear
-
 ## Batch execution guidance
 
 - Generate a unified trait list before writing per-trait phenotype vectors
