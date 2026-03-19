@@ -8,8 +8,6 @@
     <img src="shanxiagri_logo.png" alt="Shanxi Agricultural University" height="90">
   </p>
 
-  # BreedingSkills
-
 # BreedingSkills
 
 [English](README.md) | [简体中文](README.zh-CN.md)
